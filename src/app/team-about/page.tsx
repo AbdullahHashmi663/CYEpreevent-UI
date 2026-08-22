@@ -282,7 +282,7 @@ export default function TeamAboutPage() {
                 <div className="space-y-4">
                   <div className="h-16 relative w-44">
                     <Image
-                      src="/images/youth insight.png"
+                      src="/images/Vertical Logo YI 1.png"
                       alt="Youth Insight Pakistan Logo"
                       fill
                       className="object-contain object-left"
