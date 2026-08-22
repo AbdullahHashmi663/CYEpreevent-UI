@@ -184,12 +184,12 @@ export default function CategoriesScrollSection() {
       <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#003B96]/60 via-white/50 via-[#167C38]/60 to-transparent" />
       <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#167C38]/60 via-white/50 via-[#003B96]/60 to-transparent" />
 
-      <div className="w-full px-4 sm:px-8 lg:px-12 xl:px-16 max-w-7xl mx-auto">
-        <div className="grid grid-cols-12 gap-4 sm:gap-8 items-start relative">
+      <div className="w-full px-3 sm:px-8 lg:px-12 xl:px-16 max-w-7xl mx-auto">
+        <div className="grid grid-cols-12 gap-2 sm:gap-6 md:gap-8 items-start relative">
           
           {/* Left Vertical Label Column */}
-          <div className="col-span-3 sm:col-span-2 flex flex-col items-center justify-start sticky top-36 z-20 pt-4">
-            <div className="flex flex-col items-center gap-6">
+          <div className="col-span-3 sm:col-span-2 flex flex-col items-center justify-start sticky top-36 z-20 pt-4 pl-0 sm:pl-2">
+            <div className="flex flex-col items-center gap-5 sm:gap-6">
               {/* Dynamic glowing pulsing indicator matching active item */}
               <div className="relative flex items-center justify-center">
                 <div
@@ -218,18 +218,18 @@ export default function CategoriesScrollSection() {
               
               {/* Vertical Rotated Text */}
               <span
-                className="text-xs sm:text-sm font-black uppercase tracking-[0.35em] bg-gradient-to-b from-white via-slate-300 to-slate-500 bg-clip-text text-transparent transform -rotate-90 origin-center whitespace-nowrap py-6"
+                className="text-[10px] sm:text-xs md:text-sm font-black uppercase tracking-[0.25em] sm:tracking-[0.35em] bg-gradient-to-b from-white via-slate-300 to-slate-500 bg-clip-text text-transparent transform -rotate-90 origin-center whitespace-nowrap py-4 sm:py-6"
                 style={{ writingMode: "vertical-rl" }}
               >
                 CATEGORIES
               </span>
 
               {/* Progress counter with brand colors */}
-              <div className="flex flex-col items-center text-[11px] font-black font-mono">
+              <div className="flex flex-col items-center text-[10px] sm:text-[11px] font-black font-mono">
                 <span className="text-[#F26522]">
                   {String(activeIndex + 1).padStart(2, "0")}
                 </span>
-                <span className="text-white/30 text-[9px] my-0.5">/</span>
+                <span className="text-white/30 text-[8px] sm:text-[9px] my-0.5">/</span>
                 <span className="text-[#167C38]">
                   {String(CATEGORIES_DATA.length).padStart(2, "0")}
                 </span>
@@ -238,7 +238,7 @@ export default function CategoriesScrollSection() {
           </div>
 
           {/* Right Stacked Category Titles */}
-          <div className="col-span-9 sm:col-span-10 space-y-8 sm:space-y-12 lg:space-y-16 pl-2 sm:pl-6 border-l border-white/10 relative">
+          <div className="col-span-9 sm:col-span-10 space-y-6 sm:space-y-12 lg:space-y-16 pl-2.5 sm:pl-6 border-l border-white/10 relative">
             {CATEGORIES_DATA.map((cat, idx) => {
               const isActive = activeIndex === idx;
 
@@ -250,22 +250,22 @@ export default function CategoriesScrollSection() {
                   }}
                   className={`group transition-all duration-500 cursor-pointer ${
                     isActive
-                      ? "opacity-100 scale-100 translate-x-2"
+                      ? "opacity-100 scale-100 translate-x-0.5 sm:translate-x-2"
                       : "opacity-30 hover:opacity-75 scale-[0.98] translate-x-0"
                   }`}
                   onClick={() => setActiveIndex(idx)}
                 >
                   <Link
                     href="/competitions"
-                    className="block space-y-2 focus:outline-none"
+                    className="block space-y-1.5 sm:space-y-2 focus:outline-none"
                   >
                     {/* Track Badge & Subtitle */}
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs font-mono font-bold text-slate-500 group-hover:text-slate-300 transition-colors">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <span className="text-[10px] sm:text-xs font-mono font-bold text-slate-500 group-hover:text-slate-300 transition-colors">
                         {cat.id}
                       </span>
                       <span
-                        className={`text-[11px] font-black uppercase tracking-wider px-3 py-0.5 rounded-full transition-all duration-300 ${
+                        className={`text-[9px] sm:text-[11px] font-black uppercase tracking-wider px-2 sm:px-3 py-0.5 rounded-full transition-all duration-300 ${
                           isActive
                             ? cat.activeBadge
                             : "bg-white/10 text-slate-400 group-hover:bg-white/15 group-hover:text-white"
@@ -281,10 +281,10 @@ export default function CategoriesScrollSection() {
                       )}
                     </div>
 
-                    {/* Giant Headline Typography */}
-                    <div className="flex items-center justify-between gap-4">
+                    {/* Headline Typography & Arrow Button */}
+                    <div className="flex items-center justify-between gap-2 sm:gap-4">
                       <h2
-                        className={`text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black uppercase tracking-tight transition-all duration-300 ${
+                        className={`text-lg xs:text-xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black uppercase tracking-tight leading-tight sm:leading-none transition-all duration-300 break-words ${
                           isActive
                             ? `text-white ${cat.glowShadow}`
                             : `text-slate-600 ${cat.accentHover}`
@@ -293,14 +293,15 @@ export default function CategoriesScrollSection() {
                         {cat.name}
                       </h2>
 
+                      {/* Arrow CTA Button - slightly offset to the left on mobile */}
                       <div
-                        className={`w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center transition-all duration-300 ${
+                        className={`w-8 h-8 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl flex-shrink-0 flex items-center justify-center transition-all duration-300 mr-2.5 sm:mr-0 ${
                           isActive
-                            ? `bg-white ${cat.iconTextColor} scale-100 opacity-100 shadow-xl shadow-white/10`
+                            ? `bg-white ${cat.iconTextColor} scale-100 opacity-100 shadow-xl shadow-white/15`
                             : "bg-white/5 text-slate-600 scale-90 opacity-0 group-hover:opacity-100 group-hover:text-white group-hover:bg-white/15"
                         }`}
                       >
-                        <ArrowUpRight className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2.5]" />
+                        <ArrowUpRight className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />
                       </div>
                     </div>
                   </Link>
