@@ -41,7 +41,7 @@ export default function HeroSection({ onExploreClick, onRegisterClick }: HeroSec
   return (
     <section
       ref={containerRef}
-      className="relative w-full min-h-[92vh] flex flex-col justify-between overflow-hidden bg-slate-50 pt-6 sm:pt-10 pb-8 select-none"
+      className="relative w-full min-h-[92vh] flex flex-col justify-between gap-6 sm:gap-10 overflow-hidden bg-slate-50 pt-6 sm:pt-10 pb-8 select-none"
     >
       {/* Background Graphic Image with On-Scroll Zoom & Blur */}
       <motion.div
@@ -98,10 +98,10 @@ export default function HeroSection({ onExploreClick, onRegisterClick }: HeroSec
             <DateVenueBadge />
 
             {/* Dual CTA Buttons */}
-            <div className="flex flex-wrap items-center gap-4 pt-2">
+            <div className="flex flex-wrap items-center gap-3 sm:gap-4 pt-2">
               <button
                 onClick={onRegisterClick}
-                className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full text-sm font-black text-white bg-gradient-to-r from-[#F97316] via-[#EA580C] to-[#C2410C] hover:from-[#EA580C] hover:to-[#9A3412] cye-glow-orange transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg cursor-pointer"
+                className="inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-3 sm:py-3.5 rounded-full text-xs sm:text-sm font-black text-white bg-gradient-to-r from-[#F97316] via-[#EA580C] to-[#C2410C] hover:from-[#EA580C] hover:to-[#9A3412] cye-glow-orange transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg cursor-pointer"
               >
                 <Trophy className="w-4 h-4" />
                 <span>Register for Competitions</span>
@@ -116,11 +116,11 @@ export default function HeroSection({ onExploreClick, onRegisterClick }: HeroSec
                     onExploreClick();
                   }
                 }}
-                className="inline-flex items-center gap-3 text-slate-700 hover:text-[#003B96] font-bold text-sm sm:text-base group transition-colors cursor-pointer px-4 py-3 rounded-full hover:bg-white/80"
+                className="inline-flex items-center gap-2.5 sm:gap-3 text-slate-700 hover:text-[#003B96] font-bold text-xs sm:text-base group transition-colors cursor-pointer px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-full hover:bg-white/80"
               >
                 <span>Explore Tracks</span>
-                <div className="w-9 h-9 rounded-full border border-slate-300 bg-white/90 flex items-center justify-center group-hover:border-[#003B96] group-hover:bg-[#003B96] group-hover:text-white transition-all duration-300 shadow-xs">
-                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-slate-300 bg-white/90 flex items-center justify-center group-hover:border-[#003B96] group-hover:bg-[#003B96] group-hover:text-white transition-all duration-300 shadow-xs">
+                  <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform group-hover:translate-x-1" />
                 </div>
               </a>
             </div>
@@ -132,16 +132,16 @@ export default function HeroSection({ onExploreClick, onRegisterClick }: HeroSec
       </div>
 
       {/* Floating Presented By Sub-Hero Banner */}
-      <div className="relative z-20 mt-[40px] sm:mt-[60px]">
+      <div className="relative z-20 mt-4 sm:mt-8 md:mt-12">
         <PresentedByBanner />
 
         {/* Explore What Awaits You Section Indicator */}
-        <div className="flex items-center justify-center gap-3 pt-6 pb-2 text-xs font-black text-slate-600 uppercase tracking-widest select-none">
-          <span className="w-12 h-[2px] bg-gradient-to-r from-transparent to-[#003B96]" />
-          <span className="w-2 h-2 rounded-full bg-[#003B96]" />
+        <div className="flex items-center justify-center gap-2.5 sm:gap-3 pt-6 pb-2 text-[10px] sm:text-xs font-black text-slate-600 uppercase tracking-widest select-none">
+          <span className="w-8 sm:w-12 h-[2px] bg-gradient-to-r from-transparent to-[#003B96]" />
+          <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#003B96]" />
           <span className="text-slate-900 font-extrabold">EXPLORE WHAT AWAITS YOU</span>
-          <span className="w-2 h-2 rounded-full bg-[#F26522]" />
-          <span className="w-12 h-[2px] bg-gradient-to-l from-transparent to-[#F26522]" />
+          <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#F26522]" />
+          <span className="w-8 sm:w-12 h-[2px] bg-gradient-to-l from-transparent to-[#F26522]" />
         </div>
       </div>
     </section>
