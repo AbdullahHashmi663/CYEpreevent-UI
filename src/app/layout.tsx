@@ -8,6 +8,7 @@ import {
 import "./globals.css";
 import N8nChatWidget from "@/components/chat/N8nChatWidget";
 import BlindCurtainsTransition from "@/components/layout/BlindCurtainsTransition";
+import InitialPageLoader from "@/components/layout/InitialPageLoader";
 import ScrollToTopButton from "@/components/layout/ScrollToTopButton";
 
 // Primary Body Font: Manrope (400, 500, 600, 700, 800)
@@ -65,6 +66,7 @@ export default function RootLayout({
       className={`${fontManrope.variable} ${fontBricolage.variable} ${fontMono.variable} ${fontInstrumentSerif.variable} antialiased scroll-smooth`}
     >
       <body className="min-h-screen flex flex-col font-sans bg-[#F8FAFC] text-slate-900 selection:bg-[#003B96] selection:text-white">
+        <InitialPageLoader />
         <BlindCurtainsTransition />
         {children}
         <ScrollToTopButton />
