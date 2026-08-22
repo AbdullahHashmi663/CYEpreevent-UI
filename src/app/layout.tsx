@@ -53,6 +53,20 @@ export const metadata: Metadata = {
     "Youth Insight",
     "Al Nakhla",
   ],
+  icons: {
+    icon: [
+      { url: "/cye-logo.png", href: "/cye-logo.png" },
+      { url: "/images/logo-removebg-preview 8.png", href: "/images/logo-removebg-preview 8.png" },
+    ],
+    shortcut: "/cye-logo.png",
+    apple: "/cye-logo.png",
+  },
+  openGraph: {
+    title: "Capital Youth Expo 2026 | Pre Event at BUIC",
+    description:
+      "Official Capital Youth Expo pre-event hosted at Bahria University Islamabad Campus (BUIC).",
+    images: [{ url: "/images/logo-removebg-preview 8.png" }],
+  },
 };
 
 export default function RootLayout({
