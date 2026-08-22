@@ -51,7 +51,7 @@ export default function PresentedByBanner() {
             {/* Youth Insight Logo */}
             <div className="relative w-24 sm:w-28 h-14 bg-slate-50/80 rounded-2xl p-2 border border-slate-200/80 flex items-center justify-center">
               <Image
-                src="/images/Vertical Logo YI 1.png"
+                src="/images/youth insight.png"
                 alt="Youth Insight Pakistan"
                 fill
                 className="object-contain p-1"
