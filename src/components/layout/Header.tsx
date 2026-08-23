@@ -73,6 +73,7 @@ export default function Header({ onOpenRegister }: HeaderProps) {
     <motion.header
       initial={false}
       animate={{
+
         height: isShrunk ? 60 : 80,
         backgroundColor: isShrunk
           ? "rgba(255, 255, 255, 0.39)"
@@ -153,8 +154,8 @@ export default function Header({ onOpenRegister }: HeaderProps) {
                 key={item.name}
                 href={item.href}
                 className={`relative px-3.5 py-2 rounded-full text-xs xl:text-sm font-bold transition-all duration-200 ${isActive
-                    ? "text-[#003B96] bg-blue-50/80 shadow-xs"
-                    : "text-slate-600 hover:text-[#003B96] hover:bg-slate-100/70"
+                  ? "text-[#003B96] bg-blue-50/80 shadow-xs"
+                  : "text-slate-600 hover:text-[#003B96] hover:bg-slate-100/70"
                   }`}
               >
                 {item.name}
@@ -231,8 +232,8 @@ export default function Header({ onOpenRegister }: HeaderProps) {
                     href={item.href}
                     onClick={() => setMobileMenuOpen(false)}
                     className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-colors ${isActive
-                        ? "bg-[#003B96] text-white shadow-sm"
-                        : "text-slate-700 hover:bg-slate-100"
+                      ? "bg-[#003B96] text-white shadow-sm"
+                      : "text-slate-700 hover:bg-slate-100"
                       }`}
                   >
                     <Icon className="w-4 h-4 opacity-80" />

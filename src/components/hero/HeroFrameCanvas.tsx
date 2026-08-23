@@ -9,11 +9,11 @@ interface HeroFrameCanvasProps {
   className?: string;
 }
 
-const TOTAL_FRAMES = 500;
+const TOTAL_FRAMES = 400;
 
 function getFrameUrl(index: number): string {
   const frameNumber = String(index + 1).padStart(3, "0");
-  return `/images/hero-frames-hq/frame-${frameNumber}.webp`;
+  return `/images/hero-frames/frame-${frameNumber}.jpg`;
 }
 
 export default function HeroFrameCanvas({
@@ -53,6 +53,7 @@ export default function HeroFrameCanvas({
     const ctx = canvas.getContext("2d", { alpha: false });
     if (!ctx) return;
 
+    // Enable high quality image scaling
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = "high";
 
@@ -86,11 +87,11 @@ export default function HeroFrameCanvas({
       offsetX = (canvasWidth - renderWidth) / 2;
     }
 
-    // Draw base frame
+    // Draw base frame with full opacity
     ctx.globalAlpha = 1.0;
     ctx.drawImage(baseImg, offsetX, offsetY, renderWidth, renderHeight);
 
-    // Sub-frame cross-fade for seamless interpolation during slow scrub
+    // Sub-frame cross-fade interpolation if scrolling between discrete frames
     if (blendRatio > 0.02 && nextIdx !== baseIdx) {
       const nextImg = imagesRef.current[nextIdx];
       if (nextImg && nextImg.complete && nextImg.naturalWidth > 0) {
@@ -119,7 +120,7 @@ export default function HeroFrameCanvas({
     }
   }, [drawFrame]);
 
-  // Load Frame 1 immediately for instant paint, then progressively preload all 500 frames
+  // Load Frame 1 immediately for instant paint, then progressively preload all 400 frames
   useEffect(() => {
     let isCancelled = false;
     let loadedCount = 0;
@@ -161,7 +162,7 @@ export default function HeroFrameCanvas({
     };
 
     const loadRemainingFrames = () => {
-      const BATCH_SIZE = 24;
+      const BATCH_SIZE = 20;
       let currentIndex = 1;
 
       const loadNextBatch = () => {
@@ -194,7 +195,7 @@ export default function HeroFrameCanvas({
           if (typeof window !== "undefined" && "requestIdleCallback" in window) {
             (window as unknown as { requestIdleCallback: (cb: () => void) => void }).requestIdleCallback(loadNextBatch);
           } else {
-            setTimeout(loadNextBatch, 8);
+            setTimeout(loadNextBatch, 10);
           }
         }
       };
@@ -239,9 +240,9 @@ export default function HeroFrameCanvas({
       const current = currentFrameRef.current;
       const diff = target - current;
 
-      // High-precision smooth lerp dampening
+      // High-precision smooth lerp dampening across 400 frames
       if (Math.abs(diff) > 0.005) {
-        currentFrameRef.current += diff * 0.24;
+        currentFrameRef.current += diff * 0.28;
         drawFrame(currentFrameRef.current);
       }
 
@@ -266,7 +267,7 @@ export default function HeroFrameCanvas({
         className="w-full h-full object-cover block pointer-events-none will-change-transform"
         style={{
           opacity: firstFrameLoaded ? 1 : 0,
-          filter: "contrast(1.04) saturate(1.06) brightness(1.01)",
+          filter: "contrast(1.05) saturate(1.08) brightness(1.02)",
           transition: "opacity 0.35s ease-out",
         }}
         aria-hidden="true"
@@ -279,7 +280,7 @@ export default function HeroFrameCanvas({
       {!firstFrameLoaded && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src="/images/hero-frames-hq/frame-001.webp"
+          src="/images/hero-frames/frame-001.jpg"
           alt="Capital Youth Expo 3D Assembled Monument"
           className="absolute inset-0 w-full h-full object-cover pointer-events-none"
         />
@@ -289,7 +290,7 @@ export default function HeroFrameCanvas({
       <noscript>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/images/hero-frames-hq/frame-001.webp"
+          src="/images/hero-frames/frame-001.jpg"
           alt="Capital Youth Expo Monument"
           className="absolute inset-0 w-full h-full object-cover pointer-events-none"
         />
