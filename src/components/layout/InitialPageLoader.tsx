@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, Trophy, Code, Gamepad2, Palette } from "lucide-react";
@@ -16,6 +16,7 @@ export default function InitialPageLoader() {
   const [isLoading, setIsLoading] = useState(true);
   const [progress, setProgress] = useState(0);
   const [statusMessage, setStatusMessage] = useState("Calibrating CYE 2026 Arenas...");
+  const realFrameProgressRef = useRef<number>(0);
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -27,49 +28,71 @@ export default function InitialPageLoader() {
       windowLoaded = true;
     };
 
+    const handleFrameProgress = (e: Event) => {
+      const customEvent = e as CustomEvent<{ progress: number }>;
+      if (customEvent.detail && typeof customEvent.detail.progress === "number") {
+        realFrameProgressRef.current = customEvent.detail.progress;
+      }
+    };
+
     if (typeof window !== "undefined") {
       if (document.readyState === "complete") {
         windowLoaded = true;
       } else {
         window.addEventListener("load", handleWindowLoad);
       }
+      window.addEventListener("cye-hero-frame-progress", handleFrameProgress);
     }
 
     const interval = setInterval(() => {
-      if (currentProgress < 30) {
-        currentProgress += Math.floor(Math.random() * 7) + 3;
-        setStatusMessage("Initializing Technology & Hackathon Tracks...");
-      } else if (currentProgress < 60) {
-        currentProgress += Math.floor(Math.random() * 6) + 3;
-        setStatusMessage("Setting up Literary, Speech & Arts Exhibits...");
-      } else if (currentProgress < 85) {
+      const realFrameP = realFrameProgressRef.current;
+
+      // Advance progress based on real frame-loading progress + time progression
+      if (currentProgress < realFrameP) {
+        currentProgress = Math.min(realFrameP, currentProgress + 4);
+      } else if (currentProgress < 30) {
         currentProgress += Math.floor(Math.random() * 5) + 2;
-        setStatusMessage("Preparing CS2 Esports Arena & Keynotes...");
-      } else if (currentProgress < 99) {
-        if (windowLoaded) {
+      } else if (currentProgress < 70) {
+        currentProgress += Math.floor(Math.random() * 4) + 2;
+      } else if (currentProgress < 95) {
+        if (realFrameP >= 95 || windowLoaded) {
           currentProgress += 3;
         } else {
-          currentProgress = Math.min(98, currentProgress + 0.6);
+          currentProgress = Math.min(95, currentProgress + 0.8);
         }
+      } else {
+        if (realFrameP >= 99 || windowLoaded) {
+          currentProgress = 100;
+        }
+      }
+
+      // Update milestone messages
+      if (currentProgress < 30) {
+        setStatusMessage("Initializing Technology & 3D Stage Frames...");
+      } else if (currentProgress < 60) {
+        setStatusMessage("Loading Literary, Speech & Arts Tracks...");
+      } else if (currentProgress < 85) {
+        setStatusMessage("Preparing CS2 Esports Arena & Keynotes...");
+      } else if (currentProgress < 99) {
         setStatusMessage("Connecting to BUIC Islamabad Campus...");
       } else {
-        currentProgress = 100;
         setStatusMessage("Welcome to Capital Youth Expo 2026!");
         clearInterval(interval);
 
         setTimeout(() => {
           setIsLoading(false);
           document.body.style.overflow = "";
-        }, 450);
+        }, 400);
       }
 
       setProgress(Math.min(100, Math.floor(currentProgress)));
-    }, 40);
+    }, 35);
 
     return () => {
       clearInterval(interval);
       if (typeof window !== "undefined") {
         window.removeEventListener("load", handleWindowLoad);
+        window.removeEventListener("cye-hero-frame-progress", handleFrameProgress);
       }
       document.body.style.overflow = "";
     };
