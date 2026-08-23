@@ -45,26 +45,33 @@ export default function HeroFrameCanvas({
     }
   }, []);
 
-  // Draw a specific image frame onto canvas with cover aspect ratio
-  const drawFrame = useCallback((frameIdx: number) => {
+  // Draw frame with sub-frame cross-fading & high-quality interpolation
+  const drawFrame = useCallback((frameFloat: number) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { alpha: false });
     if (!ctx) return;
 
-    // Use current frame or fallback to first loaded available frame
-    let img = imagesRef.current[frameIdx];
-    if (!img || !img.complete || img.naturalWidth === 0) {
-      img = imagesRef.current[0];
+    // Enable high quality image scaling
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+
+    const baseIdx = Math.max(0, Math.min(TOTAL_FRAMES - 1, Math.floor(frameFloat)));
+    const nextIdx = Math.min(TOTAL_FRAMES - 1, baseIdx + 1);
+    const blendRatio = frameFloat - baseIdx;
+
+    let baseImg = imagesRef.current[baseIdx];
+    if (!baseImg || !baseImg.complete || baseImg.naturalWidth === 0) {
+      baseImg = imagesRef.current[0];
     }
-    if (!img || !img.complete || img.naturalWidth === 0) return;
+    if (!baseImg || !baseImg.complete || baseImg.naturalWidth === 0) return;
 
     const canvasWidth = canvas.width;
     const canvasHeight = canvas.height;
 
     // Calculate aspect-ratio covering dimensions
-    const imgRatio = img.naturalWidth / img.naturalHeight;
+    const imgRatio = baseImg.naturalWidth / baseImg.naturalHeight;
     const canvasRatio = canvasWidth / canvasHeight;
 
     let renderWidth = canvasWidth;
@@ -80,8 +87,19 @@ export default function HeroFrameCanvas({
       offsetX = (canvasWidth - renderWidth) / 2;
     }
 
-    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-    ctx.drawImage(img, offsetX, offsetY, renderWidth, renderHeight);
+    // Draw base frame with full opacity
+    ctx.globalAlpha = 1.0;
+    ctx.drawImage(baseImg, offsetX, offsetY, renderWidth, renderHeight);
+
+    // Sub-frame cross-fade interpolation if scrolling between discrete frames
+    if (blendRatio > 0.03 && nextIdx !== baseIdx) {
+      const nextImg = imagesRef.current[nextIdx];
+      if (nextImg && nextImg.complete && nextImg.naturalWidth > 0) {
+        ctx.globalAlpha = blendRatio;
+        ctx.drawImage(nextImg, offsetX, offsetY, renderWidth, renderHeight);
+        ctx.globalAlpha = 1.0;
+      }
+    }
   }, []);
 
   // Resize canvas to match display size with Device Pixel Ratio
@@ -89,7 +107,7 @@ export default function HeroFrameCanvas({
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const dpr = Math.min(typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1, 2);
+    const dpr = Math.min(typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1, 2.5);
     const rect = canvas.getBoundingClientRect();
 
     const displayWidth = Math.round(rect.width * dpr);
@@ -98,7 +116,7 @@ export default function HeroFrameCanvas({
     if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
       canvas.width = displayWidth;
       canvas.height = displayHeight;
-      drawFrame(Math.round(currentFrameRef.current));
+      drawFrame(currentFrameRef.current);
     }
   }, [drawFrame]);
 
@@ -144,7 +162,6 @@ export default function HeroFrameCanvas({
     };
 
     const loadRemainingFrames = () => {
-      // Chunked loading to ensure smooth main thread and rapid cache populating
       const BATCH_SIZE = 16;
       let currentIndex = 1;
 
@@ -210,7 +227,7 @@ export default function HeroFrameCanvas({
     targetFrameRef.current = clampedProgress * (TOTAL_FRAMES - 1);
   }, [scrollProgress, prefersReducedMotion, drawFrame]);
 
-  // RAF loop for buttery-smooth lerped frame rendering at any scroll speed
+  // RAF loop for buttery-smooth lerped frame rendering with sub-frame cross-fading
   useEffect(() => {
     if (prefersReducedMotion) return;
 
@@ -223,14 +240,10 @@ export default function HeroFrameCanvas({
       const current = currentFrameRef.current;
       const diff = target - current;
 
-      // Smooth lerp dampening for seamless scrubbing
-      if (Math.abs(diff) > 0.01) {
-        currentFrameRef.current += diff * 0.28;
-        const targetFrameIndex = Math.min(
-          TOTAL_FRAMES - 1,
-          Math.max(0, Math.round(currentFrameRef.current))
-        );
-        drawFrame(targetFrameIndex);
+      // High-precision smooth lerp dampening
+      if (Math.abs(diff) > 0.005) {
+        currentFrameRef.current += diff * 0.26;
+        drawFrame(currentFrameRef.current);
       }
 
       rafIdRef.current = requestAnimationFrame(renderLoop);
@@ -247,17 +260,21 @@ export default function HeroFrameCanvas({
   }, [drawFrame, prefersReducedMotion]);
 
   return (
-    <div className={`relative w-full h-full select-none ${className}`}>
-      {/* High-Performance Interactive HTML5 Canvas */}
+    <div className={`relative w-full h-full select-none overflow-hidden ${className}`}>
+      {/* High-Performance Interactive HTML5 Canvas with Sharpness & Contrast Enhancement */}
       <canvas
         ref={canvasRef}
-        className="w-full h-full object-cover block pointer-events-none"
+        className="w-full h-full object-cover block pointer-events-none will-change-transform"
         style={{
           opacity: firstFrameLoaded ? 1 : 0,
+          filter: "contrast(1.05) saturate(1.08) brightness(1.02)",
           transition: "opacity 0.35s ease-out",
         }}
         aria-hidden="true"
       />
+
+      {/* Cinematic Ambient Lighting Glow Overlay */}
+      <div className="absolute inset-0 bg-radial from-white/10 via-transparent to-black/20 pointer-events-none" />
 
       {/* Fallback Static Image for SSR / Instant First-Paint / No-JS */}
       {!firstFrameLoaded && (
