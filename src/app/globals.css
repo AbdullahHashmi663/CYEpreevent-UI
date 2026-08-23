@@ -100,20 +100,25 @@
   box-shadow: 0 10px 25px -5px rgba(22, 124, 56, 0.35);
 }
 
-/* Custom Scrollbar */
+/* Ultra-Thin Minimalist Scrollbar */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.45) transparent;
+}
+
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 3px;
+  height: 3px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
+  background: rgba(148, 163, 184, 0.45);
+  border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #003B96;
 }
 
 /* ================= CYBER CUT-BORDER BUTTON (Styled Component Animation) ================= */
