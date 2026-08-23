@@ -37,8 +37,22 @@
     color: #0F172A;
     font-family: var(--font-sans);
     overflow-x: hidden;
-    selection-background-color: #003B96;
-    selection-color: #ffffff;
+  }
+
+  /* Global selection styling: Green background with Blue text */
+  ::selection {
+    background-color: #167C38 !important;
+    color: #003B96 !important;
+  }
+
+  ::-moz-selection {
+    background-color: #167C38 !important;
+    color: #003B96 !important;
+  }
+
+  *::selection {
+    background-color: #167C38 !important;
+    color: #003B96 !important;
   }
 
   h1, h2, h3, h4 {
