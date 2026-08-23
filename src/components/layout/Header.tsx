@@ -75,8 +75,8 @@ export default function Header({ onOpenRegister }: HeaderProps) {
       animate={{
         height: isShrunk ? 60 : 80,
         backgroundColor: isShrunk
-          ? "rgba(255, 255, 255, 0.78)"
-          : "rgba(255, 255, 255, 0.96)",
+          ? "rgba(255, 255, 255, 0.39)"
+          : "rgba(255, 255, 255, 0.47)",
         boxShadow: isShrunk
           ? "0 12px 30px -10px rgba(0, 59, 150, 0.12), 0 4px 6px -2px rgba(0, 0, 0, 0.04)"
           : "0 1px 3px 0 rgba(0, 0, 0, 0.03)",
@@ -91,7 +91,7 @@ export default function Header({ onOpenRegister }: HeaderProps) {
       className="sticky top-0 z-50 w-full backdrop-blur-2xl border-b select-none will-change-transform"
     >
       <div className="w-full h-full px-4 sm:px-8 lg:px-12 xl:px-16 flex items-center justify-between">
-        
+
         {/* Brand Logo & Title with smooth Motion Scale */}
         <Link href="/" className="flex items-center gap-2.5 sm:gap-3 group">
           <motion.div
@@ -145,18 +145,17 @@ export default function Header({ onOpenRegister }: HeaderProps) {
               item.href === "/"
                 ? pathname === "/"
                 : item.href.startsWith("/#")
-                ? false
-                : pathname.startsWith(item.href);
+                  ? false
+                  : pathname.startsWith(item.href);
 
             return (
               <Link
                 key={item.name}
                 href={item.href}
-                className={`relative px-3.5 py-2 rounded-full text-xs xl:text-sm font-bold transition-all duration-200 ${
-                  isActive
+                className={`relative px-3.5 py-2 rounded-full text-xs xl:text-sm font-bold transition-all duration-200 ${isActive
                     ? "text-[#003B96] bg-blue-50/80 shadow-xs"
                     : "text-slate-600 hover:text-[#003B96] hover:bg-slate-100/70"
-                }`}
+                  }`}
               >
                 {item.name}
                 {isActive && (
@@ -223,19 +222,18 @@ export default function Header({ onOpenRegister }: HeaderProps) {
                   item.href === "/"
                     ? pathname === "/"
                     : item.href.startsWith("/#")
-                    ? false
-                    : pathname.startsWith(item.href);
+                      ? false
+                      : pathname.startsWith(item.href);
 
                 return (
                   <Link
                     key={item.name}
                     href={item.href}
                     onClick={() => setMobileMenuOpen(false)}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-colors ${
-                      isActive
+                    className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-colors ${isActive
                         ? "bg-[#003B96] text-white shadow-sm"
                         : "text-slate-700 hover:bg-slate-100"
-                    }`}
+                      }`}
                   >
                     <Icon className="w-4 h-4 opacity-80" />
                     <span>{item.name}</span>
