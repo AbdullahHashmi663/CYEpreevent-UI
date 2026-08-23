@@ -9,11 +9,11 @@ interface HeroFrameCanvasProps {
   className?: string;
 }
 
-const TOTAL_FRAMES = 256;
+const TOTAL_FRAMES = 500;
 
 function getFrameUrl(index: number): string {
   const frameNumber = String(index + 1).padStart(3, "0");
-  return `/images/hero%20frames/ezgif-frame-${frameNumber}.jpg`;
+  return `/images/hero-frames-hq/frame-${frameNumber}.webp`;
 }
 
 export default function HeroFrameCanvas({
@@ -22,16 +22,11 @@ export default function HeroFrameCanvas({
   onLoaded,
   className = "",
 }: HeroFrameCanvasProps) {
-  const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imagesRef = useRef<(HTMLImageElement | null)[]>(new Array(TOTAL_FRAMES).fill(null));
-  
-  const currentProgressRef = useRef<number>(0);
-  const targetProgressRef = useRef<number>(0);
+  const currentFrameRef = useRef<number>(0);
+  const targetFrameRef = useRef<number>(0);
   const rafIdRef = useRef<number | null>(null);
-
-  const [useVideoEngine, setUseVideoEngine] = useState(false);
-  const [isVideoReady, setIsVideoReady] = useState(false);
   const [firstFrameLoaded, setFirstFrameLoaded] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
@@ -50,7 +45,7 @@ export default function HeroFrameCanvas({
     }
   }, []);
 
-  // Draw frame on canvas (fallback engine / initial paint)
+  // Draw frame with sub-frame cross-fading & high-quality interpolation
   const drawFrame = useCallback((frameFloat: number) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -74,6 +69,7 @@ export default function HeroFrameCanvas({
     const canvasWidth = canvas.width;
     const canvasHeight = canvas.height;
 
+    // Calculate aspect-ratio covering dimensions
     const imgRatio = baseImg.naturalWidth / baseImg.naturalHeight;
     const canvasRatio = canvasWidth / canvasHeight;
 
@@ -90,10 +86,12 @@ export default function HeroFrameCanvas({
       offsetX = (canvasWidth - renderWidth) / 2;
     }
 
+    // Draw base frame
     ctx.globalAlpha = 1.0;
     ctx.drawImage(baseImg, offsetX, offsetY, renderWidth, renderHeight);
 
-    if (blendRatio > 0.03 && nextIdx !== baseIdx) {
+    // Sub-frame cross-fade for seamless interpolation during slow scrub
+    if (blendRatio > 0.02 && nextIdx !== baseIdx) {
       const nextImg = imagesRef.current[nextIdx];
       if (nextImg && nextImg.complete && nextImg.naturalWidth > 0) {
         ctx.globalAlpha = blendRatio;
@@ -103,7 +101,7 @@ export default function HeroFrameCanvas({
     }
   }, []);
 
-  // Resize canvas handler
+  // Resize canvas to match display size with Device Pixel Ratio
   const handleResize = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -117,13 +115,14 @@ export default function HeroFrameCanvas({
     if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
       canvas.width = displayWidth;
       canvas.height = displayHeight;
-      drawFrame(currentProgressRef.current * (TOTAL_FRAMES - 1));
+      drawFrame(currentFrameRef.current);
     }
   }, [drawFrame]);
 
-  // Initialize 4K Video Hardware Engine & Initial Image Load
+  // Load Frame 1 immediately for instant paint, then progressively preload all 500 frames
   useEffect(() => {
     let isCancelled = false;
+    let loadedCount = 0;
 
     const notifyProgress = (percent: number) => {
       if (onLoadingProgress) {
@@ -138,57 +137,70 @@ export default function HeroFrameCanvas({
       }
     };
 
-    // 1. Load initial frame for instant first paint
+    // 1. First priority: load Frame 1 immediately
     const firstImg = new Image();
     firstImg.src = getFrameUrl(0);
     firstImg.onload = () => {
       if (isCancelled) return;
       imagesRef.current[0] = firstImg;
+      loadedCount += 1;
       setFirstFrameLoaded(true);
       handleResize();
       drawFrame(0);
-      notifyProgress(40);
+
+      notifyProgress(Math.floor((loadedCount / TOTAL_FRAMES) * 100));
+
+      // 2. Start progressive batch loading for remaining frames
+      loadRemainingFrames();
     };
 
-    // 2. Warm up 4K video element
-    const video = videoRef.current;
-    if (video) {
-      const handleVideoReady = () => {
-        if (isCancelled) return;
-        setIsVideoReady(true);
-        setUseVideoEngine(true);
-        notifyProgress(100);
-        if (onLoaded) onLoaded();
-      };
-
-      const handleVideoProgress = () => {
-        if (video.buffered.length > 0 && video.duration > 0) {
-          const loadedFraction = video.buffered.end(0) / video.duration;
-          notifyProgress(Math.min(100, Math.floor(40 + loadedFraction * 60)));
-        }
-      };
-
-      if (video.readyState >= 3) {
-        handleVideoReady();
-      } else {
-        video.addEventListener("canplaythrough", handleVideoReady, { once: true });
-        video.addEventListener("loadeddata", handleVideoReady, { once: true });
-        video.addEventListener("progress", handleVideoProgress);
+    firstImg.onerror = () => {
+      if (!isCancelled) {
+        firstImg.src = getFrameUrl(0);
       }
+    };
 
-      window.addEventListener("resize", handleResize);
+    const loadRemainingFrames = () => {
+      const BATCH_SIZE = 24;
+      let currentIndex = 1;
 
-      return () => {
-        isCancelled = true;
-        video.removeEventListener("canplaythrough", handleVideoReady);
-        video.removeEventListener("loadeddata", handleVideoReady);
-        video.removeEventListener("progress", handleVideoProgress);
-        window.removeEventListener("resize", handleResize);
-        if (rafIdRef.current) {
-          cancelAnimationFrame(rafIdRef.current);
+      const loadNextBatch = () => {
+        if (isCancelled || currentIndex >= TOTAL_FRAMES) return;
+
+        const end = Math.min(currentIndex + BATCH_SIZE, TOTAL_FRAMES);
+        for (let i = currentIndex; i < end; i++) {
+          const img = new Image();
+          img.src = getFrameUrl(i);
+          img.onload = () => {
+            if (isCancelled) return;
+            imagesRef.current[i] = img;
+            loadedCount += 1;
+
+            const percent = Math.floor((loadedCount / TOTAL_FRAMES) * 100);
+            notifyProgress(percent);
+
+            if (loadedCount >= TOTAL_FRAMES) {
+              if (onLoaded) onLoaded();
+            }
+          };
+          img.onerror = () => {
+            if (isCancelled) return;
+            loadedCount += 1;
+          };
+        }
+
+        currentIndex = end;
+        if (currentIndex < TOTAL_FRAMES) {
+          if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+            (window as unknown as { requestIdleCallback: (cb: () => void) => void }).requestIdleCallback(loadNextBatch);
+          } else {
+            setTimeout(loadNextBatch, 8);
+          }
         }
       };
-    }
+
+      loadNextBatch();
+    };
 
     window.addEventListener("resize", handleResize);
 
@@ -201,25 +213,20 @@ export default function HeroFrameCanvas({
     };
   }, [handleResize, drawFrame, onLoadingProgress, onLoaded]);
 
-  // Update target progress from scroll
+  // Update target frame based on scroll progress
   useEffect(() => {
     if (prefersReducedMotion) {
-      targetProgressRef.current = 0;
-      currentProgressRef.current = 0;
-      const video = videoRef.current;
-      if (video && video.duration > 0) {
-        video.currentTime = 0;
-      } else {
-        drawFrame(0);
-      }
+      targetFrameRef.current = 0;
+      currentFrameRef.current = 0;
+      drawFrame(0);
       return;
     }
 
     const clampedProgress = Math.max(0, Math.min(1, scrollProgress));
-    targetProgressRef.current = clampedProgress;
+    targetFrameRef.current = clampedProgress * (TOTAL_FRAMES - 1);
   }, [scrollProgress, prefersReducedMotion, drawFrame]);
 
-  // High-performance RAF scroll scrub loop
+  // RAF loop for buttery-smooth lerped frame rendering with sub-frame cross-fading
   useEffect(() => {
     if (prefersReducedMotion) return;
 
@@ -228,28 +235,14 @@ export default function HeroFrameCanvas({
     const renderLoop = () => {
       if (!isRunning) return;
 
-      const target = targetProgressRef.current;
-      const current = currentProgressRef.current;
+      const target = targetFrameRef.current;
+      const current = currentFrameRef.current;
       const diff = target - current;
 
-      if (Math.abs(diff) > 0.0008) {
-        currentProgressRef.current += diff * 0.22;
-        const progress = currentProgressRef.current;
-
-        const video = videoRef.current;
-        if (useVideoEngine && video && video.duration > 0 && !isNaN(video.duration)) {
-          // Hardware 4K Video Seek
-          const targetTime = Math.min(
-            video.duration - 0.02,
-            Math.max(0, progress * video.duration)
-          );
-          if (Math.abs(video.currentTime - targetTime) > 0.015) {
-            video.currentTime = targetTime;
-          }
-        } else {
-          // Fallback Canvas Draw
-          drawFrame(progress * (TOTAL_FRAMES - 1));
-        }
+      // High-precision smooth lerp dampening
+      if (Math.abs(diff) > 0.005) {
+        currentFrameRef.current += diff * 0.24;
+        drawFrame(currentFrameRef.current);
       }
 
       rafIdRef.current = requestAnimationFrame(renderLoop);
@@ -263,33 +256,17 @@ export default function HeroFrameCanvas({
         cancelAnimationFrame(rafIdRef.current);
       }
     };
-  }, [drawFrame, useVideoEngine, prefersReducedMotion]);
+  }, [drawFrame, prefersReducedMotion]);
 
   return (
     <div className={`relative w-full h-full select-none overflow-hidden ${className}`}>
-      {/* 1. Hardware-Accelerated 4K Pristine Video Engine */}
-      <video
-        ref={videoRef}
-        src="/images/hero-venue-cinematic.mp4"
-        playsInline
-        muted
-        preload="auto"
-        className="w-full h-full object-cover block pointer-events-none will-change-transform"
-        style={{
-          opacity: isVideoReady ? 1 : 0,
-          filter: "contrast(1.04) saturate(1.06) brightness(1.01)",
-          transition: "opacity 0.5s ease-out",
-        }}
-        aria-hidden="true"
-      />
-
-      {/* 2. High-Performance Canvas Fallback / Initial Buffer Paint */}
+      {/* High-Performance Interactive HTML5 Canvas with Sharpness & Contrast Enhancement */}
       <canvas
         ref={canvasRef}
-        className="absolute inset-0 w-full h-full object-cover block pointer-events-none will-change-transform"
+        className="w-full h-full object-cover block pointer-events-none will-change-transform"
         style={{
-          opacity: firstFrameLoaded && !isVideoReady ? 1 : 0,
-          filter: "contrast(1.05) saturate(1.08) brightness(1.02)",
+          opacity: firstFrameLoaded ? 1 : 0,
+          filter: "contrast(1.04) saturate(1.06) brightness(1.01)",
           transition: "opacity 0.35s ease-out",
         }}
         aria-hidden="true"
@@ -299,10 +276,10 @@ export default function HeroFrameCanvas({
       <div className="absolute inset-0 bg-radial from-white/10 via-transparent to-black/20 pointer-events-none" />
 
       {/* Fallback Static Image for SSR / Instant First-Paint / No-JS */}
-      {!firstFrameLoaded && !isVideoReady && (
+      {!firstFrameLoaded && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src="/images/hero%20frames/ezgif-frame-001.jpg"
+          src="/images/hero-frames-hq/frame-001.webp"
           alt="Capital Youth Expo 3D Assembled Monument"
           className="absolute inset-0 w-full h-full object-cover pointer-events-none"
         />
@@ -312,7 +289,7 @@ export default function HeroFrameCanvas({
       <noscript>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/images/hero%20frames/ezgif-frame-001.jpg"
+          src="/images/hero-frames-hq/frame-001.webp"
           alt="Capital Youth Expo Monument"
           className="absolute inset-0 w-full h-full object-cover pointer-events-none"
         />
