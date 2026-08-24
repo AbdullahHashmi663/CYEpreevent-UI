@@ -7,6 +7,7 @@ interface HeroFrameCanvasProps {
   onLoadingProgress?: (progress: number) => void;
   onLoaded?: () => void;
   className?: string;
+  isMobile?: boolean;
 }
 
 const TOTAL_FRAMES = 260;
@@ -21,6 +22,7 @@ export default function HeroFrameCanvas({
   onLoadingProgress,
   onLoaded,
   className = "",
+  isMobile: isMobileProp,
 }: HeroFrameCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imagesRef = useRef<(HTMLImageElement | null)[]>(new Array(TOTAL_FRAMES).fill(null));
@@ -30,21 +32,33 @@ export default function HeroFrameCanvas({
   const rafIdRef = useRef<number | null>(null);
   const [firstFrameLoaded, setFirstFrameLoaded] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const [isMobileScreen, setIsMobileScreen] = useState(false);
 
-  // Check prefers-reduced-motion
+  // Check prefers-reduced-motion and screen width for mobile optimization
   useEffect(() => {
     if (typeof window !== "undefined") {
       const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
       setPrefersReducedMotion(mediaQuery.matches);
+
+      const checkScreen = () => {
+        setIsMobileScreen(window.innerWidth < 768);
+      };
+      checkScreen();
 
       const handleChange = (e: MediaQueryListEvent) => {
         setPrefersReducedMotion(e.matches);
       };
 
       mediaQuery.addEventListener("change", handleChange);
-      return () => mediaQuery.removeEventListener("change", handleChange);
+      window.addEventListener("resize", checkScreen);
+      return () => {
+        mediaQuery.removeEventListener("change", handleChange);
+        window.removeEventListener("resize", checkScreen);
+      };
     }
   }, []);
+
+  const effectiveIsMobile = isMobileProp ?? isMobileScreen;
 
   // High-performance canvas frame drawer
   const drawFrame = useCallback((frameFloat: number, forceRedraw = false) => {
@@ -127,7 +141,9 @@ export default function HeroFrameCanvas({
     }
   }, [drawFrame]);
 
-  // Load Frame 1 immediately for instant paint, then progressively preload all 260 frames
+  // Load Frame 1 immediately for instant paint.
+  // On mobile: stop here and do NOT load the other 259 frames to avoid lag & cellular data waste.
+  // On desktop: progressively batch-preload all remaining frames.
   useEffect(() => {
     let isCancelled = false;
     let loadedCount = 0;
@@ -156,9 +172,16 @@ export default function HeroFrameCanvas({
       handleResize();
       drawFrame(0, true);
 
+      // On mobile screens: instant completion with single high-res poster frame
+      if (effectiveIsMobile) {
+        notifyProgress(100);
+        if (onLoaded) onLoaded();
+        return;
+      }
+
       notifyProgress(Math.floor((loadedCount / TOTAL_FRAMES) * 100));
 
-      // 2. Start progressive batch loading for remaining 259 frames
+      // 2. Start progressive batch loading for remaining 259 frames on desktop
       loadRemainingFrames();
     };
 
@@ -169,11 +192,12 @@ export default function HeroFrameCanvas({
     };
 
     const loadRemainingFrames = () => {
+      if (effectiveIsMobile) return;
       const BATCH_SIZE = 15;
       let currentIndex = 1;
 
       const loadNextBatch = () => {
-        if (isCancelled || currentIndex >= TOTAL_FRAMES) return;
+        if (isCancelled || effectiveIsMobile || currentIndex >= TOTAL_FRAMES) return;
 
         const end = Math.min(currentIndex + BATCH_SIZE, TOTAL_FRAMES);
         for (let i = currentIndex; i < end; i++) {
@@ -198,7 +222,7 @@ export default function HeroFrameCanvas({
         }
 
         currentIndex = end;
-        if (currentIndex < TOTAL_FRAMES) {
+        if (currentIndex < TOTAL_FRAMES && !effectiveIsMobile) {
           if (typeof window !== "undefined" && "requestIdleCallback" in window) {
             (window as unknown as { requestIdleCallback: (cb: () => void) => void }).requestIdleCallback(loadNextBatch);
           } else {
@@ -219,11 +243,11 @@ export default function HeroFrameCanvas({
         cancelAnimationFrame(rafIdRef.current);
       }
     };
-  }, [handleResize, drawFrame, onLoadingProgress, onLoaded]);
+  }, [handleResize, drawFrame, onLoadingProgress, onLoaded, effectiveIsMobile]);
 
-  // Update target frame based on scroll progress
+  // Update target frame based on scroll progress (desktop only)
   useEffect(() => {
-    if (prefersReducedMotion) {
+    if (prefersReducedMotion || effectiveIsMobile) {
       targetFrameRef.current = 0;
       currentFrameRef.current = 0;
       drawFrame(0, true);
@@ -232,11 +256,11 @@ export default function HeroFrameCanvas({
 
     const clampedProgress = Math.max(0, Math.min(1, scrollProgress));
     targetFrameRef.current = clampedProgress * (TOTAL_FRAMES - 1);
-  }, [scrollProgress, prefersReducedMotion, drawFrame]);
+  }, [scrollProgress, prefersReducedMotion, effectiveIsMobile, drawFrame]);
 
-  // RAF loop for buttery-smooth lerped frame rendering
+  // RAF loop for buttery-smooth lerped frame rendering (desktop only)
   useEffect(() => {
-    if (prefersReducedMotion) return;
+    if (prefersReducedMotion || effectiveIsMobile) return;
 
     let isRunning = true;
 
@@ -264,7 +288,7 @@ export default function HeroFrameCanvas({
         cancelAnimationFrame(rafIdRef.current);
       }
     };
-  }, [drawFrame, prefersReducedMotion]);
+  }, [drawFrame, prefersReducedMotion, effectiveIsMobile]);
 
   return (
     <div className={`relative w-full h-full select-none overflow-hidden ${className}`}>
