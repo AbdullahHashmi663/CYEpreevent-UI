@@ -21,20 +21,13 @@ export default function Footer() {
   });
 
   // Vertical size expansion completes earlier
-  const scaleY = useTransform(smoothProgress, [0, 0.75, 1], [0.78, 1, 1]);
+  const scaleY = useTransform(smoothProgress, [0, 0.75, 1], [0.88, 1, 1]);
 
   // Opacity transitions to full clarity earlier
-  const opacity = useTransform(smoothProgress, [0, 0.25, 0.7, 1], [0.2, 0.7, 1, 1]);
-
-  // Filter transitions to sharp blur(0px) earlier
-  const blurFilter = useTransform(
-    smoothProgress,
-    [0, 0.45, 0.75, 1],
-    ["blur(18px)", "blur(3px)", "blur(0px)", "blur(0px)"]
-  );
+  const opacity = useTransform(smoothProgress, [0, 0.25, 0.7, 1], [0.4, 0.75, 1, 1]);
 
   // Parallax upward lift completes earlier
-  const translateY = useTransform(smoothProgress, [0, 0.75, 1], ["45px", "0px", "0px"]);
+  const translateY = useTransform(smoothProgress, [0, 0.75, 1], ["25px", "0px", "0px"]);
 
   return (
     <footer
@@ -45,7 +38,6 @@ export default function Footer() {
         style={{
           scaleY,
           opacity,
-          filter: blurFilter,
           y: translateY,
           transformOrigin: "bottom center",
           width: "100%",
@@ -56,8 +48,8 @@ export default function Footer() {
         <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#003B96] via-[#F26522] via-[#167C38] to-transparent" />
         
         {/* Background ambient lighting */}
-        <div className="absolute top-0 left-1/3 w-[500px] h-[500px] bg-[#003B96]/30 rounded-full blur-[140px] pointer-events-none" />
-        <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-[#167C38]/20 rounded-full blur-[140px] pointer-events-none" />
+        <div className="absolute top-0 left-1/3 w-[500px] h-[500px] bg-[radial-gradient(circle,rgba(0,59,150,0.3)_0%,transparent_70%)] pointer-events-none" />
+        <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-[radial-gradient(circle,rgba(22,124,56,0.2)_0%,transparent_70%)] pointer-events-none" />
 
         {/* ================= LEFT SIDE GEOMETRIC MATRIX PATTERN ================= */}
         <div

@@ -40,24 +40,29 @@ export default function Header({ onOpenRegister }: HeaderProps) {
   const lastScrollY = useRef(0);
 
   useEffect(() => {
+    let ticking = false;
     const handleScroll = () => {
-      const currentScrollY = window.scrollY;
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY;
 
-      if (currentScrollY <= 20) {
-        setIsScrolled(false);
-        setScrollDirection("up");
-      } else {
-        setIsScrolled(true);
-        if (currentScrollY > lastScrollY.current + 8) {
-          // Scrolling downward
-          setScrollDirection("down");
-        } else if (currentScrollY < lastScrollY.current - 8) {
-          // Scrolling upward
-          setScrollDirection("up");
-        }
+          if (currentScrollY <= 20) {
+            setIsScrolled(false);
+            setScrollDirection("up");
+          } else {
+            setIsScrolled(true);
+            if (currentScrollY > lastScrollY.current + 12) {
+              setScrollDirection("down");
+            } else if (currentScrollY < lastScrollY.current - 12) {
+              setScrollDirection("up");
+            }
+          }
+
+          lastScrollY.current = currentScrollY;
+          ticking = false;
+        });
+        ticking = true;
       }
-
-      lastScrollY.current = currentScrollY;
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -70,40 +75,21 @@ export default function Header({ onOpenRegister }: HeaderProps) {
   const isShrunk = isScrolled && scrollDirection === "down";
 
   return (
-    <motion.header
-      initial={false}
-      animate={{
-
-        height: isShrunk ? 60 : 80,
-        backgroundColor: isShrunk
-          ? "rgba(255, 255, 255, 0.39)"
-          : "rgba(255, 255, 255, 0.47)",
-        boxShadow: isShrunk
-          ? "0 12px 30px -10px rgba(0, 59, 150, 0.12), 0 4px 6px -2px rgba(0, 0, 0, 0.04)"
-          : "0 1px 3px 0 rgba(0, 0, 0, 0.03)",
-        borderColor: isShrunk
-          ? "rgba(226, 232, 240, 0.65)"
-          : "rgba(226, 232, 240, 0.9)",
-      }}
-      transition={{
-        duration: 0.42,
-        ease: [0.16, 1, 0.3, 1],
-      }}
-      className="sticky top-0 z-50 w-full backdrop-blur-2xl border-b select-none will-change-transform"
+    <header
+      className={`sticky top-0 z-50 w-full transition-all duration-300 select-none border-b ${
+        isScrolled
+          ? "bg-white/85 backdrop-blur-md border-slate-200/80 shadow-sm py-2 sm:py-2.5"
+          : "bg-white/95 backdrop-blur-xs border-slate-200/60 py-3 sm:py-4"
+      }`}
     >
       <div className="w-full h-full px-4 sm:px-8 lg:px-12 xl:px-16 flex items-center justify-between">
 
-        {/* Brand Logo & Title with smooth Motion Scale */}
+        {/* Brand Logo & Title */}
         <Link href="/" className="flex items-center gap-2.5 sm:gap-3 group">
-          <motion.div
-            animate={{
-              scale: isShrunk ? 0.86 : 1,
-            }}
-            transition={{
-              duration: 0.42,
-              ease: [0.16, 1, 0.3, 1],
-            }}
-            className="relative w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0 origin-left"
+          <div
+            className={`relative flex-shrink-0 origin-left transition-transform duration-300 ${
+              isShrunk ? "w-10 h-10 sm:w-12 sm:h-12 scale-95" : "w-12 h-12 sm:w-14 sm:h-14 scale-100"
+            }`}
           >
             <Image
               src="/images/logo-removebg-preview 8.png"
@@ -112,7 +98,7 @@ export default function Header({ onOpenRegister }: HeaderProps) {
               className="object-contain transition-transform duration-300 group-hover:scale-105"
               priority
             />
-          </motion.div>
+          </div>
 
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
@@ -123,19 +109,13 @@ export default function Header({ onOpenRegister }: HeaderProps) {
                 BUIC 2026
               </span>
             </div>
-            <motion.span
-              animate={{
-                opacity: isShrunk ? 0.85 : 1,
-                fontSize: isShrunk ? "10px" : "11.5px",
-              }}
-              transition={{
-                duration: 0.42,
-                ease: [0.16, 1, 0.3, 1],
-              }}
-              className="font-extrabold text-[#167C38] tracking-wide uppercase"
+            <span
+              className={`font-extrabold text-[#167C38] tracking-wide uppercase transition-all duration-300 ${
+                isShrunk ? "text-[10px] opacity-85" : "text-[11px] sm:text-[11.5px] opacity-100"
+              }`}
             >
               PRE EVENT AT BUIC • 1ST OCT
-            </motion.span>
+            </span>
           </div>
         </Link>
 
@@ -258,6 +238,6 @@ export default function Header({ onOpenRegister }: HeaderProps) {
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.header>
+    </header>
   );
 }

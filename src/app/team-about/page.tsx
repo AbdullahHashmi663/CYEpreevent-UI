@@ -5,6 +5,7 @@ import Image from "next/image";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import RegisterModal from "@/components/registration/RegisterModal";
+import TeamCoverflowMarquee from "@/components/team/TeamCoverflowMarquee";
 import {
   Users,
   Shield,
@@ -153,6 +154,9 @@ export default function TeamAboutPage() {
                 </p>
               </div>
             </div>
+
+            {/* Team Coverflow Marquee Carousel (Auto-advances every 2.5s) */}
+            <TeamCoverflowMarquee />
 
             {/* Connector Line 2 */}
             <div className="flex justify-center">

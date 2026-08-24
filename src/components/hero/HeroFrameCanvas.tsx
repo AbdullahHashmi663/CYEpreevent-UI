@@ -14,7 +14,7 @@ const TOTAL_FRAMES = 260;
 
 function getFrameUrl(index: number): string {
   const frameNumber = String(index + 1).padStart(3, "0");
-  return `/images/hero-frames/frame-${frameNumber}.jpg`;
+  return `/images/hero-frames/frame-${frameNumber}.webp`;
 }
 
 export default function HeroFrameCanvas({
@@ -128,7 +128,7 @@ export default function HeroFrameCanvas({
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const dpr = Math.min(typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1, 2);
+    const dpr = Math.min(typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1, 1.5);
     const rect = canvas.getBoundingClientRect();
 
     const displayWidth = Math.round(rect.width * dpr);

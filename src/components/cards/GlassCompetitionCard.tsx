@@ -1,8 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import {
   ArrowRight,
   Trophy,
@@ -121,67 +119,27 @@ export default function GlassCompetitionCard({
   index = 0,
 }: GlassCompetitionCardProps) {
   const IconComponent = comp.icon;
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-      setPrefersReducedMotion(mq.matches);
-
-      const listener = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
-      mq.addEventListener("change", listener);
-      return () => mq.removeEventListener("change", listener);
-    }
-  }, []);
-
-  // Determine kinematic side drive-in animation based on column index
-  const colIndex = index % 3;
-  let initialVariant = { opacity: 0, x: -75, y: 0, rotate: -2.5, scale: 0.94 };
-
-  if (colIndex === 1) {
-    // Center column drives up with punch
-    initialVariant = { opacity: 0, x: 0, y: 65, rotate: 0, scale: 0.92 };
-  } else if (colIndex === 2) {
-    // Right column drives in from right
-    initialVariant = { opacity: 0, x: 75, y: 0, rotate: 2.5, scale: 0.94 };
-  }
 
   return (
-    <motion.div
-      initial={prefersReducedMotion ? false : initialVariant}
-      whileInView={
-        prefersReducedMotion
-          ? { opacity: 1 }
-          : { opacity: 1, x: 0, y: 0, rotate: 0, scale: 1 }
-      }
-      viewport={{ once: false, amount: 0.2 }}
-      transition={{
-        type: "spring",
-        stiffness: 95,
-        damping: 16,
-        delay: (index % 3) * 0.08,
-      }}
-      whileHover={{ y: -7, scale: 1.015 }}
-      className="group relative rounded-3xl p-6 sm:p-7 flex flex-col justify-between overflow-hidden transition-all duration-300 cursor-pointer will-change-transform"
+    <div
+      className="group relative rounded-3xl p-6 sm:p-7 flex flex-col justify-between overflow-hidden transition-all duration-300 ease-out hover:-translate-y-2.5 shadow-[0_12px_30px_-10px_rgba(0,59,150,0.08),0_2px_6px_rgba(0,0,0,0.03),inset_0_1px_0_rgba(255,255,255,1)] hover:shadow-[0_28px_65px_-12px_rgba(0,59,150,0.22),0_14px_30px_-8px_rgba(0,0,0,0.08),0_0_0_1px_rgba(0,59,150,0.15),inset_0_1px_0_rgba(255,255,255,1)] cursor-pointer"
       style={{
         background:
-          "linear-gradient(145deg, rgba(255, 255, 255, 0.96) 0%, rgba(248, 250, 252, 0.88) 50%, rgba(241, 245, 249, 0.94) 100%)",
-        backdropFilter: "blur(20px)",
-        WebkitBackdropFilter: "blur(20px)",
-        border: "1px solid rgba(255, 255, 255, 0.9)",
-        boxShadow:
-          "0 15px 35px -10px rgba(0, 59, 150, 0.08), 0 1px 3px rgba(0, 0, 0, 0.03), inset 0 1px 0 rgba(255, 255, 255, 1)",
+          "linear-gradient(145deg, rgba(255, 255, 255, 0.97) 0%, rgba(248, 250, 252, 0.90) 50%, rgba(241, 245, 249, 0.95) 100%)",
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
+        border: "1px solid rgba(226, 232, 240, 0.9)",
       }}
     >
       {/* Themed Background SVG Watermark */}
       {renderThemedWatermark(comp.title, comp.track)}
 
       {/* Top Specular Glass Highlight Line */}
-      <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-white via-[#003B96]/20 to-transparent pointer-events-none" />
+      <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-white via-[#003B96]/25 to-transparent pointer-events-none" />
 
       {/* Dynamic Ambient Corner Spotlight */}
-      <div className="absolute -top-16 -right-16 w-40 h-40 rounded-full bg-[#003B96]/10 blur-3xl group-hover:bg-[#F26522]/15 group-hover:scale-125 transition-all duration-500 pointer-events-none" />
-      <div className="absolute -bottom-16 -left-16 w-40 h-40 rounded-full bg-[#167C38]/10 blur-3xl group-hover:bg-[#003B96]/15 group-hover:scale-125 transition-all duration-500 pointer-events-none" />
+      <div className="absolute -top-16 -right-16 w-44 h-44 rounded-full bg-[#003B96]/10 blur-2xl group-hover:bg-[#F26522]/20 group-hover:scale-130 transition-all duration-500 pointer-events-none opacity-60 group-hover:opacity-100" />
+      <div className="absolute -bottom-16 -left-16 w-44 h-44 rounded-full bg-[#167C38]/10 blur-2xl group-hover:bg-[#003B96]/20 group-hover:scale-130 transition-all duration-500 pointer-events-none opacity-60 group-hover:opacity-100" />
 
       {/* Main Content Area */}
       <div className="relative z-10 space-y-4">
@@ -268,6 +226,6 @@ export default function GlassCompetitionCard({
           Rules
         </Link>
       </div>
-    </motion.div>
+    </div>
   );
 }

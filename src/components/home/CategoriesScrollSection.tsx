@@ -132,16 +132,27 @@ const CATEGORIES_DATA: CategoryItem[] = [
 
 export default function CategoriesScrollSection() {
   const [activeIndex, setActiveIndex] = useState<number>(0);
+  const activeIndexRef = useRef<number>(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const isScheduledRef = useRef<boolean>(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      if (!containerRef.current) return;
+    const checkActiveItem = () => {
+      isScheduledRef.current = false;
+      const container = containerRef.current;
+      if (!container) return;
 
-      const viewportCenter = window.innerHeight / 2;
+      const containerRect = container.getBoundingClientRect();
+      const windowHeight = window.innerHeight;
 
-      let closestIdx = 0;
+      // Skip calculation completely if section is off-screen
+      if (containerRect.bottom < 0 || containerRect.top > windowHeight) {
+        return;
+      }
+
+      const viewportCenter = windowHeight / 2;
+      let closestIdx = activeIndexRef.current;
       let minDistance = Infinity;
 
       itemRefs.current.forEach((el, index) => {
@@ -156,11 +167,22 @@ export default function CategoriesScrollSection() {
         }
       });
 
-      setActiveIndex(closestIdx);
+      // Only trigger React state update if the active index actually changed
+      if (closestIdx !== activeIndexRef.current) {
+        activeIndexRef.current = closestIdx;
+        setActiveIndex(closestIdx);
+      }
+    };
+
+    const handleScroll = () => {
+      if (!isScheduledRef.current) {
+        isScheduledRef.current = true;
+        requestAnimationFrame(checkActiveItem);
+      }
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
+    checkActiveItem();
 
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -175,10 +197,10 @@ export default function CategoriesScrollSection() {
       {/* Radiant Top Luminous White Glow Overlay */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(255,255,255,0.16),transparent)] pointer-events-none" />
 
-      {/* Dynamic Ambient Background Glows: Blue, Green, and White */}
-      <div className="absolute -top-20 -left-20 w-[550px] h-[550px] bg-[#003B96]/45 rounded-full blur-[140px] pointer-events-none transition-all duration-700" />
-      <div className="absolute -bottom-20 -right-20 w-[550px] h-[550px] bg-[#167C38]/40 rounded-full blur-[140px] pointer-events-none transition-all duration-700" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] h-[420px] bg-white/[0.08] rounded-full blur-[130px] pointer-events-none transition-all duration-700" />
+      {/* Dynamic Ambient Background Glows: High-performance precomputed radial gradients */}
+      <div className="absolute -top-20 -left-20 w-[550px] h-[550px] bg-[radial-gradient(circle,rgba(0,59,150,0.45)_0%,transparent_70%)] pointer-events-none" />
+      <div className="absolute -bottom-20 -right-20 w-[550px] h-[550px] bg-[radial-gradient(circle,rgba(22,124,56,0.4)_0%,transparent_70%)] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] h-[420px] bg-[radial-gradient(circle,rgba(255,255,255,0.08)_0%,transparent_70%)] pointer-events-none" />
 
       {/* Decorative top and bottom gradient accent borders (Blue -> White -> Green) */}
       <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#003B96]/60 via-white/50 via-[#167C38]/60 to-transparent" />

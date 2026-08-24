@@ -262,26 +262,18 @@ export default function N8nChatWidget() {
       )}
 
       {/* Little Power Robot Animation sitting on top of Ask AI Button */}
-      <motion.div
-        animate={{
-          y: [0, -6, 0],
-        }}
-        transition={{
-          duration: 2.8,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-        className="relative z-10 -mb-2 pointer-events-none self-center drop-shadow-[0_8px_16px_rgba(0,59,150,0.35)]"
-      >
-        <div className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
-          <Lottie
-            src={robotAnimation}
-            loop
-            autoplay
-            className="w-full h-full"
-          />
+      {!isOpen && (
+        <div className="relative z-10 -mb-2 pointer-events-none self-center drop-shadow-[0_8px_16px_rgba(0,59,150,0.25)]">
+          <div className="w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center">
+            <Lottie
+              src={robotAnimation}
+              loop
+              autoplay
+              className="w-full h-full"
+            />
+          </div>
         </div>
-      </motion.div>
+      )}
 
       {/* Floating Launcher Trigger with Cyber Cut-Border Animation */}
       <button

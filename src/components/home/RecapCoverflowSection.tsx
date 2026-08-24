@@ -94,10 +94,10 @@ export default function RecapCoverflowSection() {
         background: "linear-gradient(175deg, #ffffff 0%, #ffffff 68%, rgba(0, 59, 150, 0.08) 82%, rgba(22, 124, 56, 0.14) 100%)",
       }}
     >
-      {/* 30% Bottom Gradient Lighting: Blue & Green ambient glow blooms */}
-      <div className="absolute bottom-0 -left-20 w-[550px] h-[400px] bg-[#003B96]/15 rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute bottom-0 -right-20 w-[550px] h-[400px] bg-[#167C38]/18 rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-blue-50/40 rounded-full blur-[160px] pointer-events-none" />
+      {/* 30% Bottom Gradient Lighting: High-performance precomputed radial glow blooms */}
+      <div className="absolute bottom-0 -left-20 w-[550px] h-[400px] bg-[radial-gradient(circle,rgba(0,59,150,0.15)_0%,transparent_70%)] pointer-events-none" />
+      <div className="absolute bottom-0 -right-20 w-[550px] h-[400px] bg-[radial-gradient(circle,rgba(22,124,56,0.18)_0%,transparent_70%)] pointer-events-none" />
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-[radial-gradient(circle,rgba(219,234,254,0.4)_0%,transparent_70%)] pointer-events-none" />
 
       {/* Decorative gradient border lines */}
       <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#003B96]/30 via-[#F26522]/30 via-[#167C38]/30 to-transparent" />
