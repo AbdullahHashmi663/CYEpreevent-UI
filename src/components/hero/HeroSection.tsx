@@ -137,22 +137,22 @@ export default function HeroSection({
       {/* Pinned Sticky Viewport Stage */}
       <div className="sticky top-0 h-screen w-full flex flex-col justify-between overflow-hidden pt-4 sm:pt-8 pb-4 sm:pb-6">
         
-        {/* Background Stage Canvas & Ambient Lighting (Blurs on scroll for depth) */}
+        {/* Background Stage Canvas & Ambient Lighting (Zero blur on desktop, mobile-only on-scroll blur) */}
         <motion.div
           className="absolute inset-0 z-0 pointer-events-none will-change-transform"
           style={
-            prefersReducedMotion
-              ? {}
-              : isMobile
+            isMobile && !prefersReducedMotion
               ? {
                   filter: mobileBgBlur,
                   scale: mobileBgScale,
                   opacity: mobileBgOpacity,
                 }
-              : {}
+              : {
+                  filter: "none",
+                }
           }
         >
-          {/* Hero Frame Canvas: Plays 260 interactive frames on desktop; static poster on mobile */}
+          {/* Hero Frame Canvas: Plays 260 crisp interactive frames on desktop; static poster on mobile */}
           <HeroFrameCanvas
             scrollProgress={prefersReducedMotion ? 0 : currentScrollProgress}
             onLoadingProgress={onLoadingProgress}
@@ -161,7 +161,7 @@ export default function HeroSection({
           />
 
           {/* Left Gradient Overlay for crisp contrast and readability of hero text */}
-          <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/85 to-transparent md:w-3/5 lg:w-1/2 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-r from-white/90 via-white/60 to-transparent md:w-1/2 pointer-events-none" />
 
           {/* Subtle Bottom & Top Vignette Gradients */}
           <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-white/70 to-transparent pointer-events-none" />
@@ -172,23 +172,25 @@ export default function HeroSection({
         <div className="relative z-10 w-full px-4 sm:px-8 lg:px-12 xl:px-16 pt-2 sm:pt-4">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             
-            {/* Left Hero Headlines & Metadata (Always 100% Crisp - Zero Blur) */}
+            {/* Left Hero Headlines & Metadata (100% Crisp - Zero Blur on Desktop & Mobile) */}
             <motion.div
               className="lg:col-span-7 xl:col-span-6 space-y-3 sm:space-y-4 text-left will-change-transform"
               style={
                 prefersReducedMotion
-                  ? {}
+                  ? { filter: "none" }
                   : isMobile
                   ? {
                       y: mobileTextY,
                       opacity: mobileTextOpacity,
                       scale: mobileTextScale,
+                      filter: "none",
                       transformOrigin: "top left",
                     }
                   : {
                       y: desktopTextY,
                       opacity: desktopTextOpacity,
                       scale: desktopTextScale,
+                      filter: "none",
                       transformOrigin: "top left",
                     }
               }
