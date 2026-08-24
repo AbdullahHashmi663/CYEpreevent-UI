@@ -9,7 +9,7 @@ interface HeroFrameCanvasProps {
   className?: string;
 }
 
-const TOTAL_FRAMES = 400;
+const TOTAL_FRAMES = 260;
 
 function getFrameUrl(index: number): string {
   const frameNumber = String(index + 1).padStart(3, "0");
@@ -26,6 +26,7 @@ export default function HeroFrameCanvas({
   const imagesRef = useRef<(HTMLImageElement | null)[]>(new Array(TOTAL_FRAMES).fill(null));
   const currentFrameRef = useRef<number>(0);
   const targetFrameRef = useRef<number>(0);
+  const lastRenderedIdxRef = useRef<number>(-1);
   const rafIdRef = useRef<number | null>(null);
   const [firstFrameLoaded, setFirstFrameLoaded] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
@@ -45,33 +46,47 @@ export default function HeroFrameCanvas({
     }
   }, []);
 
-  // Draw frame with sub-frame cross-fading & high-quality interpolation
-  const drawFrame = useCallback((frameFloat: number) => {
+  // High-performance canvas frame drawer
+  const drawFrame = useCallback((frameFloat: number, forceRedraw = false) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const ctx = canvas.getContext("2d", { alpha: false });
     if (!ctx) return;
 
-    // Enable high quality image scaling
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = "high";
+    const frameIdx = Math.max(0, Math.min(TOTAL_FRAMES - 1, Math.round(frameFloat)));
 
-    const baseIdx = Math.max(0, Math.min(TOTAL_FRAMES - 1, Math.floor(frameFloat)));
-    const nextIdx = Math.min(TOTAL_FRAMES - 1, baseIdx + 1);
-    const blendRatio = frameFloat - baseIdx;
-
-    let baseImg = imagesRef.current[baseIdx];
-    if (!baseImg || !baseImg.complete || baseImg.naturalWidth === 0) {
-      baseImg = imagesRef.current[0];
+    // Skip redundant drawing if the frame hasn't changed unless forced (e.g. on resize)
+    if (!forceRedraw && frameIdx === lastRenderedIdxRef.current) {
+      return;
     }
-    if (!baseImg || !baseImg.complete || baseImg.naturalWidth === 0) return;
+
+    let img = imagesRef.current[frameIdx];
+    // Fallback to closest loaded frame or frame 0 if current frame is still loading
+    if (!img || !img.complete || img.naturalWidth === 0) {
+      // Find nearest loaded frame
+      let nearestImg: HTMLImageElement | null = null;
+      for (let offset = 1; offset < TOTAL_FRAMES; offset++) {
+        const left = frameIdx - offset;
+        const right = frameIdx + offset;
+        if (left >= 0 && imagesRef.current[left]?.complete && imagesRef.current[left]!.naturalWidth > 0) {
+          nearestImg = imagesRef.current[left];
+          break;
+        }
+        if (right < TOTAL_FRAMES && imagesRef.current[right]?.complete && imagesRef.current[right]!.naturalWidth > 0) {
+          nearestImg = imagesRef.current[right];
+          break;
+        }
+      }
+      img = nearestImg || imagesRef.current[0];
+    }
+    if (!img || !img.complete || img.naturalWidth === 0) return;
 
     const canvasWidth = canvas.width;
     const canvasHeight = canvas.height;
 
-    // Calculate aspect-ratio covering dimensions
-    const imgRatio = baseImg.naturalWidth / baseImg.naturalHeight;
+    // Fast aspect-ratio covering calculation
+    const imgRatio = img.naturalWidth / img.naturalHeight;
     const canvasRatio = canvasWidth / canvasHeight;
 
     let renderWidth = canvasWidth;
@@ -87,27 +102,19 @@ export default function HeroFrameCanvas({
       offsetX = (canvasWidth - renderWidth) / 2;
     }
 
-    // Draw base frame with full opacity
-    ctx.globalAlpha = 1.0;
-    ctx.drawImage(baseImg, offsetX, offsetY, renderWidth, renderHeight);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(img, offsetX, offsetY, renderWidth, renderHeight);
 
-    // Sub-frame cross-fade interpolation if scrolling between discrete frames
-    if (blendRatio > 0.02 && nextIdx !== baseIdx) {
-      const nextImg = imagesRef.current[nextIdx];
-      if (nextImg && nextImg.complete && nextImg.naturalWidth > 0) {
-        ctx.globalAlpha = blendRatio;
-        ctx.drawImage(nextImg, offsetX, offsetY, renderWidth, renderHeight);
-        ctx.globalAlpha = 1.0;
-      }
-    }
+    lastRenderedIdxRef.current = frameIdx;
   }, []);
 
-  // Resize canvas to match display size with Device Pixel Ratio
+  // Resize canvas to match display size with optimal Device Pixel Ratio
   const handleResize = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const dpr = Math.min(typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1, 2.5);
+    const dpr = Math.min(typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1, 2);
     const rect = canvas.getBoundingClientRect();
 
     const displayWidth = Math.round(rect.width * dpr);
@@ -116,11 +123,11 @@ export default function HeroFrameCanvas({
     if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
       canvas.width = displayWidth;
       canvas.height = displayHeight;
-      drawFrame(currentFrameRef.current);
+      drawFrame(currentFrameRef.current, true);
     }
   }, [drawFrame]);
 
-  // Load Frame 1 immediately for instant paint, then progressively preload all 400 frames
+  // Load Frame 1 immediately for instant paint, then progressively preload all 260 frames
   useEffect(() => {
     let isCancelled = false;
     let loadedCount = 0;
@@ -147,11 +154,11 @@ export default function HeroFrameCanvas({
       loadedCount += 1;
       setFirstFrameLoaded(true);
       handleResize();
-      drawFrame(0);
+      drawFrame(0, true);
 
       notifyProgress(Math.floor((loadedCount / TOTAL_FRAMES) * 100));
 
-      // 2. Start progressive batch loading for remaining frames
+      // 2. Start progressive batch loading for remaining 259 frames
       loadRemainingFrames();
     };
 
@@ -162,7 +169,7 @@ export default function HeroFrameCanvas({
     };
 
     const loadRemainingFrames = () => {
-      const BATCH_SIZE = 20;
+      const BATCH_SIZE = 15;
       let currentIndex = 1;
 
       const loadNextBatch = () => {
@@ -195,7 +202,7 @@ export default function HeroFrameCanvas({
           if (typeof window !== "undefined" && "requestIdleCallback" in window) {
             (window as unknown as { requestIdleCallback: (cb: () => void) => void }).requestIdleCallback(loadNextBatch);
           } else {
-            setTimeout(loadNextBatch, 10);
+            setTimeout(loadNextBatch, 15);
           }
         }
       };
@@ -219,7 +226,7 @@ export default function HeroFrameCanvas({
     if (prefersReducedMotion) {
       targetFrameRef.current = 0;
       currentFrameRef.current = 0;
-      drawFrame(0);
+      drawFrame(0, true);
       return;
     }
 
@@ -227,7 +234,7 @@ export default function HeroFrameCanvas({
     targetFrameRef.current = clampedProgress * (TOTAL_FRAMES - 1);
   }, [scrollProgress, prefersReducedMotion, drawFrame]);
 
-  // RAF loop for buttery-smooth lerped frame rendering with sub-frame cross-fading
+  // RAF loop for buttery-smooth lerped frame rendering
   useEffect(() => {
     if (prefersReducedMotion) return;
 
@@ -240,9 +247,9 @@ export default function HeroFrameCanvas({
       const current = currentFrameRef.current;
       const diff = target - current;
 
-      // High-precision smooth lerp dampening across 400 frames
-      if (Math.abs(diff) > 0.005) {
-        currentFrameRef.current += diff * 0.28;
+      // Snappy and smooth lerp dampening across 260 frames
+      if (Math.abs(diff) > 0.001) {
+        currentFrameRef.current += diff * 0.35;
         drawFrame(currentFrameRef.current);
       }
 

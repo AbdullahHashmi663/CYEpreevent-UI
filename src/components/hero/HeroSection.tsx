@@ -71,7 +71,7 @@ export default function HeroSection({
       {/* Pinned Sticky Viewport Stage */}
       <div className="sticky top-0 h-screen w-full flex flex-col justify-between overflow-hidden pt-4 sm:pt-8 pb-4 sm:pb-6">
         
-        {/* Background 256-Frame 3D Interactive Canvas */}
+        {/* Background 260-Frame 3D Interactive Canvas */}
         <div className="absolute inset-0 z-0 pointer-events-none">
           <HeroFrameCanvas
             scrollProgress={prefersReducedMotion ? 0 : currentScrollProgress}
