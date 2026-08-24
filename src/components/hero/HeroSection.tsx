@@ -69,13 +69,12 @@ export default function HeroSection({
   const desktopTextOpacity = useTransform(smoothProgress, [0, 0.7, 0.95, 1], [1, 1, 0.6, 0.1]);
   const desktopTextScale = useTransform(smoothProgress, [0, 0.7, 1], [1, 1.02, 0.98]);
 
-  // Mobile typography dynamic on-scroll pop & blur-up parallax
+  // Mobile typography dynamic on-scroll pop parallax (100% razor-sharp, zero text blur)
   const mobileTextY = useTransform(smoothProgress, [0, 0.35, 0.75, 1], ["0%", "-3%", "-10%", "-22%"]);
   const mobileTextScale = useTransform(smoothProgress, [0, 0.2, 0.6, 1], [1, 1.04, 0.98, 0.9]);
-  const mobileTextBlur = useTransform(smoothProgress, [0, 0.45, 0.8, 1], ["blur(0px)", "blur(0px)", "blur(5px)", "blur(12px)"]);
   const mobileTextOpacity = useTransform(smoothProgress, [0, 0.65, 0.9, 1], [1, 0.95, 0.4, 0]);
 
-  // Mobile background on-scroll blur-up & zoom effect
+  // Mobile background on-scroll blur-up & zoom effect (creates depth behind crisp text)
   const mobileBgBlur = useTransform(smoothProgress, [0, 0.45, 0.9], ["blur(0px)", "blur(6px)", "blur(14px)"]);
   const mobileBgScale = useTransform(smoothProgress, [0, 0.5, 1], [1, 1.05, 1.1]);
   const mobileBgOpacity = useTransform(smoothProgress, [0, 0.7, 1], [1, 0.85, 0.35]);
@@ -84,14 +83,13 @@ export default function HeroSection({
   const bannerOpacity = useTransform(smoothProgress, [0, 0.6, 0.9, 1], [1, 0.95, 0.5, 0]);
   const bannerY = useTransform(smoothProgress, [0, 0.8, 1], ["0%", "5%", "15%"]);
 
-  // Staggered popping entrance animation variants for mobile text
+  // Staggered popping entrance animation variants for crisp text
   const popWordVariants = {
-    hidden: { scale: 0.72, opacity: 0, y: 28, filter: "blur(12px)" },
+    hidden: { scale: 0.72, opacity: 0, y: 28 },
     visible: (custom: number) => ({
       scale: 1,
       opacity: 1,
       y: 0,
-      filter: "blur(0px)",
       transition: {
         type: "spring" as const,
         stiffness: 380,
@@ -102,12 +100,11 @@ export default function HeroSection({
   };
 
   const popBadgeVariants = {
-    hidden: { scale: 0.75, opacity: 0, y: -16, filter: "blur(8px)" },
+    hidden: { scale: 0.75, opacity: 0, y: -16 },
     visible: {
       scale: 1,
       opacity: 1,
       y: 0,
-      filter: "blur(0px)",
       transition: {
         type: "spring" as const,
         stiffness: 360,
@@ -118,12 +115,11 @@ export default function HeroSection({
   };
 
   const popItemVariants = {
-    hidden: { scale: 0.82, opacity: 0, y: 24, filter: "blur(10px)" },
+    hidden: { scale: 0.82, opacity: 0, y: 24 },
     visible: (custom: number) => ({
       scale: 1,
       opacity: 1,
       y: 0,
-      filter: "blur(0px)",
       transition: {
         type: "spring" as const,
         stiffness: 350,
@@ -141,7 +137,7 @@ export default function HeroSection({
       {/* Pinned Sticky Viewport Stage */}
       <div className="sticky top-0 h-screen w-full flex flex-col justify-between overflow-hidden pt-4 sm:pt-8 pb-4 sm:pb-6">
         
-        {/* Background Stage Canvas & Ambient Lighting */}
+        {/* Background Stage Canvas & Ambient Lighting (Blurs on scroll for depth) */}
         <motion.div
           className="absolute inset-0 z-0 pointer-events-none will-change-transform"
           style={
@@ -176,7 +172,7 @@ export default function HeroSection({
         <div className="relative z-10 w-full px-4 sm:px-8 lg:px-12 xl:px-16 pt-2 sm:pt-4">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             
-            {/* Left Hero Headlines & Metadata */}
+            {/* Left Hero Headlines & Metadata (Always 100% Crisp - Zero Blur) */}
             <motion.div
               className="lg:col-span-7 xl:col-span-6 space-y-3 sm:space-y-4 text-left will-change-transform"
               style={
@@ -187,7 +183,6 @@ export default function HeroSection({
                       y: mobileTextY,
                       opacity: mobileTextOpacity,
                       scale: mobileTextScale,
-                      filter: mobileTextBlur,
                       transformOrigin: "top left",
                     }
                   : {
