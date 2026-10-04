@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ChevronLeft, ChevronRight, Sparkles, Camera, Award } from "lucide-react";
 
 interface RecapItem {
@@ -19,7 +21,7 @@ const RECAP_ITEMS: RecapItem[] = [
     id: 1,
     title: "Grand Opening & Keynote Arena",
     subtitle: "Over 2,500+ attendees gathered for the inaugural youth leadership addresses at BUIC.",
-    src: "/images/recap1.png",
+    src: "/images/recap1.webp",
     tag: "Auditorium Ceremony",
     color: "#003B96",
   },
@@ -27,7 +29,7 @@ const RECAP_ITEMS: RecapItem[] = [
     id: 2,
     title: "Speed Programming & Hackathon Sprint",
     subtitle: "Intense competitive coding challenges and rapid software prototype pitching.",
-    src: "/images/recap2.png",
+    src: "/images/recap2.webp",
     tag: "Technology Arena",
     color: "#F26522",
   },
@@ -35,7 +37,7 @@ const RECAP_ITEMS: RecapItem[] = [
     id: 3,
     title: "Esports & Tactical Stadium Clash",
     subtitle: "Adrenaline-fueled collegiate championship with live casting and audience buzz.",
-    src: "/images/recap3.png",
+    src: "/images/recap3.webp",
     tag: "Esports Tournament",
     color: "#167C38",
   },
@@ -60,19 +62,102 @@ const RECAP_ITEMS: RecapItem[] = [
 export default function RecapCoverflowSection() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
   const autoPlayRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Auto-cycle carousel every 4.5s when not hovered
   useEffect(() => {
-    if (isHovered) return;
+    if (typeof window === "undefined") return;
+    gsap.registerPlugin(ScrollTrigger);
+
+    const section = sectionRef.current;
+    if (!section) return;
+
+    const ctx = gsap.context(() => {
+      if (headerRef.current) {
+        gsap.fromTo(
+          headerRef.current.children,
+          { y: -45, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            stagger: 0.12,
+            duration: 0.85,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: section,
+              start: "top 85%",
+              toggleActions: "play none none reverse",
+            },
+          }
+        );
+      }
+
+      if (stageRef.current) {
+        gsap.fromTo(
+          stageRef.current,
+          { y: -40, opacity: 0, scale: 0.96 },
+          {
+            y: 0,
+            opacity: 1,
+            scale: 1,
+            duration: 0.95,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: stageRef.current,
+              start: "top 85%",
+              toggleActions: "play none none reverse",
+            },
+          }
+        );
+      }
+    }, section);
+
+    return () => ctx.revert();
+  }, []);
+
+  // Viewport IntersectionObserver: only run timer when section is visible
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisible(entry.isIntersecting);
+      },
+      { threshold: 0.2 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  // Auto-cycle carousel every 4.5s when visible and not hovered or hidden
+  useEffect(() => {
+    if (isHovered || !isVisible) {
+      if (autoPlayRef.current) clearInterval(autoPlayRef.current);
+      return;
+    }
+
+    const handleVisibility = () => {
+      if (document.hidden) {
+        if (autoPlayRef.current) clearInterval(autoPlayRef.current);
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibility);
+
     autoPlayRef.current = setInterval(() => {
       setActiveIndex((prev) => (prev + 1) % RECAP_ITEMS.length);
     }, 4500);
 
     return () => {
       if (autoPlayRef.current) clearInterval(autoPlayRef.current);
+      document.removeEventListener("visibilitychange", handleVisibility);
     };
-  }, [isHovered]);
+  }, [isHovered, isVisible]);
 
   const handlePrev = () => {
     setActiveIndex((prev) => (prev - 1 + RECAP_ITEMS.length) % RECAP_ITEMS.length);
@@ -86,27 +171,18 @@ export default function RecapCoverflowSection() {
 
   return (
     <section
+      ref={sectionRef}
       id="recap-2023"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="relative py-24 sm:py-32 bg-white text-slate-900 overflow-hidden border-y border-slate-200/80 select-none"
-      style={{
-        background: "linear-gradient(175deg, #ffffff 0%, #ffffff 68%, rgba(0, 59, 150, 0.08) 82%, rgba(22, 124, 56, 0.14) 100%)",
-      }}
+      className="relative py-24 sm:py-32 bg-white text-slate-900 overflow-hidden border-y border-slate-200 select-none"
+      style={{ backgroundColor: "#ffffff" }}
     >
-      {/* 30% Bottom Gradient Lighting: High-performance precomputed radial glow blooms */}
-      <div className="absolute bottom-0 -left-20 w-[550px] h-[400px] bg-[radial-gradient(circle,rgba(0,59,150,0.15)_0%,transparent_70%)] pointer-events-none" />
-      <div className="absolute bottom-0 -right-20 w-[550px] h-[400px] bg-[radial-gradient(circle,rgba(22,124,56,0.18)_0%,transparent_70%)] pointer-events-none" />
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-[radial-gradient(circle,rgba(219,234,254,0.4)_0%,transparent_70%)] pointer-events-none" />
-
-      {/* Decorative gradient border lines */}
-      <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#003B96]/30 via-[#F26522]/30 via-[#167C38]/30 to-transparent" />
-      <div className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#167C38]/40 via-[#003B96]/40 via-[#F26522]/30 to-transparent" />
 
       <div className="w-full px-4 sm:px-8 lg:px-12 xl:px-16 max-w-7xl mx-auto relative z-10">
         
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto space-y-4 mb-12 sm:mb-16">
+        <div ref={headerRef} className="text-center max-w-3xl mx-auto space-y-4 mb-12 sm:mb-16">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-50 text-xs font-black uppercase tracking-widest text-[#F26522] border border-orange-200/80 shadow-xs">
             <Camera className="w-3.5 h-3.5 text-[#F26522]" />
             <span>Legacy & Heritage</span>
@@ -127,7 +203,7 @@ export default function RecapCoverflowSection() {
         </div>
 
         {/* 3D Coverflow Carousel Container */}
-        <div className="relative w-full py-6 sm:py-10 flex flex-col items-center">
+        <div ref={stageRef} className="relative w-full py-6 sm:py-10 flex flex-col items-center will-change-transform">
           
           {/* 3D Scene Viewport */}
           <div
@@ -183,11 +259,12 @@ export default function RecapCoverflowSection() {
                       src={item.src}
                       alt={item.title}
                       fill
+                      sizes="(max-width: 640px) 270px, (max-width: 1024px) 380px, 460px"
                       className={`object-cover transition-transform duration-700 ${
                         isCenter ? "scale-105" : "scale-100 filter brightness-85"
                       }`}
-                      priority={idx === 0 || idx === 1}
-                      quality={90}
+                      priority={idx === 0}
+                      quality={80}
                     />
 
                     {/* Gradient Overlay */}

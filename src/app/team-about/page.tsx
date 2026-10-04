@@ -23,48 +23,55 @@ import {
 } from "lucide-react";
 
 interface DepartmentLead {
+  name: string;
   department: string;
   lead: string;
   scope: string;
-  color: string;
+  image: string;
 }
 
 const DEPARTMENT_LEADS: DepartmentLead[] = [
   {
+    name: "Hamza Ali",
     department: "Technology & Coding Track",
-    lead: "Technical Committee",
+    lead: "Technical Committee Lead",
     scope: "Overseeing Speed Programming algorithmic judging, Mini Hackathon sprint infrastructure, and offline testing sandbox.",
-    color: "from-blue-600 to-indigo-700",
+    image: "/images/members/WhatsApp Image 2026-08-24 at 12.10.43 PM.jpeg",
   },
   {
+    name: "Ayesha Khan",
     department: "Literary Arts & Speech",
-    lead: "Literary Secretariat",
+    lead: "Literary Secretariat Lead",
     scope: "Managing English/Urdu Speech adjudication, Seerah Quiz buzzer system, Essay & Short Story blind evaluation.",
-    color: "from-emerald-600 to-teal-700",
+    image: "/images/members/WhatsApp Image 2026-08-24 at 12.10.44 PM (2).jpeg",
   },
   {
+    name: "Zaid Ahmed",
     department: "Gaming Arena & Esports",
-    lead: "Esports Management",
+    lead: "Esports Management Lead",
     scope: "Coordinating 5v5 Counter-Strike 2 tournament brackets, low-latency LAN configurations, and live spectator broadcast.",
-    color: "from-purple-600 to-violet-800",
+    image: "/images/members/WhatsApp Image 2026-08-24 at 12.10.44 PM.jpeg",
   },
   {
+    name: "Fatima Noor",
     department: "Logistics, Safety & Security",
-    lead: "Venue Operations",
+    lead: "Venue Operations Lead",
     scope: "Administering Bahria University E-8 Gate 1 & 2 security passes, venue signage, safety protocols, and emergency medical desks.",
-    color: "from-amber-600 to-orange-700",
+    image: "/images/members/WhatsApp Image 2026-08-24 at 12.10.46 PM.jpeg",
   },
   {
+    name: "Bilal Tariq",
     department: "Ambassadors & Campus Outreach",
-    lead: "Mobilization Wing",
+    lead: "Mobilization Wing Lead",
     scope: "Supervising 100+ campus ambassadors, desk registration campaigns, promotional kits, and inter-university MoUs.",
-    color: "from-rose-600 to-pink-700",
+    image: "/images/members/WhatsApp Image 2026-08-24 at 12.10.47 PM.jpeg",
   },
   {
+    name: "Maham Tariq",
     department: "Delegate Services & Media",
-    lead: "Communications Team",
+    lead: "Communications & Media Lead",
     scope: "Accreditation badges, photography, live social streaming, and VIP reception at CYE Nexus Conference.",
-    color: "from-cyan-600 to-blue-700",
+    image: "/images/members/WhatsApp Image 2026-08-24 at 12.10.45 PM.jpeg",
   },
 ];
 
@@ -83,7 +90,16 @@ export default function TeamAboutPage() {
               <Shield className="w-3.5 h-3.5 text-[#F26522]" />
               <span>Leadership & Vision</span>
             </div>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight">
+            <h1
+              className="font-serif italic font-normal text-[#167C38] tracking-normal"
+              style={{
+                fontFamily: "var(--font-serif), 'Instrument Serif', Georgia, serif",
+                fontSize: "52px",
+                lineHeight: "56px",
+                fontWeight: 400,
+                fontStyle: "italic",
+              }}
+            >
               About CYE & Executive Body
             </h1>
             <p className="text-slate-500 text-sm sm:text-base font-medium leading-relaxed">
@@ -102,56 +118,133 @@ export default function TeamAboutPage() {
               </h2>
             </div>
 
-            {/* Level 1: Event Head */}
+            {/* Level 1: Event Head (Geometric Conic Pattern with Gold Neon Lighting Effect) */}
             <div className="flex justify-center">
-              <div className="w-full max-w-md bg-gradient-to-br from-[#003B96] to-[#001D4D] rounded-3xl p-6 sm:p-8 text-white shadow-xl border border-blue-400/20 text-center relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                  <Crown className="w-24 h-24" />
+              <div className="relative w-full max-w-[320px] sm:max-w-[350px] h-[490px] sm:h-[520px] rounded-3xl overflow-hidden border border-amber-400/50 shadow-[0_0_40px_rgba(245,158,11,0.25)] hover:shadow-[0_0_65px_rgba(245,158,11,0.5)] hover:border-amber-400/80 hover:-translate-y-2 transition-all duration-500 ease-out flex flex-col justify-end group select-none">
+                {/* 3D Geometric Cube Pattern Background with Glowing Neon Lines */}
+                <div className="absolute inset-0 geometric-cube-pattern geometric-lighting-gold pointer-events-none" />
+
+                {/* Radiant Ambient Halo Light Effect Behind Person */}
+                <div className="absolute top-10 left-1/2 -translate-x-1/2 w-56 h-56 rounded-full bg-amber-500/30 blur-3xl animate-neon-pulse pointer-events-none" />
+
+                {/* Subtle Ambient Vignette and Bottom Gradient Fade */}
+                <div className="absolute inset-0 bg-radial from-transparent via-black/20 to-black/75 pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0e1017] via-[#0e1017]/92 via-38% to-transparent pointer-events-none" />
+
+                {/* Floating Crown Badge with Neon Glow */}
+                <div className="absolute top-4 right-4 z-20 opacity-40 group-hover:opacity-80 transition-opacity pointer-events-none drop-shadow-[0_0_10px_rgba(251,191,36,0.6)]">
+                  <Crown className="w-10 h-10 text-amber-400" />
                 </div>
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-400/20 text-amber-300 text-[11px] font-black uppercase tracking-wider mb-3">
-                  <Crown className="w-3.5 h-3.5" />
-                  <span>Event Head</span>
+
+                {/* Transparent Cutout Portrait with 3D Drop Shadow */}
+                <div className="absolute inset-x-0 top-3 h-[320px] sm:h-[350px] pointer-events-none">
+                  <Image
+                    src="/images/members/without-bg/WhatsApp_Image_2026-08-24_at_12.10.44_PM__1_-removebg-preview.png"
+                    alt="Mamoon Ahmed Ali - Event Head"
+                    fill
+                    className="object-contain object-bottom filter drop-shadow-[0_15px_30px_rgba(0,0,0,0.9)] group-hover:scale-105 transition-transform duration-500"
+                    priority
+                  />
                 </div>
-                <h3 className="text-2xl sm:text-3xl font-black tracking-tight">
-                  Mamoon Ahmed Ali
-                </h3>
-                <p className="text-blue-200 text-xs sm:text-sm font-medium mt-1">
-                  Overall Event Strategy, Executive Supervision & BUIC Protocol
-                </p>
+
+                {/* Bottom Content Area */}
+                <div className="relative z-10 p-6 sm:p-7 text-center space-y-1.5 pointer-events-none">
+                  <h3 className="text-2xl sm:text-[28px] font-black text-white tracking-tight leading-snug drop-shadow-md">
+                    Mamoon Ahmed Ali
+                  </h3>
+
+                  <p className="text-[11px] sm:text-xs font-black uppercase tracking-[0.22em] text-amber-400 drop-shadow-[0_0_12px_rgba(251,191,36,0.4)]">
+                    Event Head
+                  </p>
+
+                  <p className="text-xs sm:text-[13px] text-slate-300 font-medium leading-relaxed max-w-[280px] mx-auto pt-1 line-clamp-3">
+                    Overall Event Strategy, Executive Supervision & BUIC Protocol
+                  </p>
+                </div>
               </div>
             </div>
 
-            {/* Connector Line 1 */}
+            {/* Connector Line 1 with Glowing Gradient */}
             <div className="flex justify-center">
-              <div className="w-0.5 h-8 bg-slate-300" />
+              <div className="w-0.5 h-8 bg-gradient-to-b from-amber-400/50 to-slate-400" />
             </div>
 
-            {/* Level 2: Deputy Event Heads */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
-              <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/90 shadow-md text-center space-y-2 relative overflow-hidden group hover:border-[#167C38] transition-all">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-[#167C38] text-[11px] font-black uppercase tracking-wider">
-                  <UserCheck className="w-3.5 h-3.5" />
-                  <span>Deputy Event Head</span>
+            {/* Level 2: Deputy Event Heads (Geometric Pattern with Lighting Lines) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto justify-items-center">
+              {/* Deputy Head 1: Hamid Sultan (Emerald Neon Lighting) */}
+              <div className="relative w-full max-w-[320px] sm:max-w-[340px] h-[480px] sm:h-[500px] rounded-3xl overflow-hidden border border-emerald-500/50 shadow-[0_0_40px_rgba(16,185,129,0.25)] hover:shadow-[0_0_65px_rgba(16,185,129,0.5)] hover:border-emerald-400/80 hover:-translate-y-2 transition-all duration-500 ease-out flex flex-col justify-end group select-none">
+                {/* 3D Geometric Cube Pattern Background with Emerald Glowing Lines */}
+                <div className="absolute inset-0 geometric-cube-pattern geometric-lighting-emerald pointer-events-none" />
+
+                {/* Radiant Ambient Halo Light Effect Behind Person */}
+                <div className="absolute top-10 left-1/2 -translate-x-1/2 w-56 h-56 rounded-full bg-emerald-500/30 blur-3xl animate-neon-pulse pointer-events-none" />
+
+                {/* Ambient Vignette and Bottom Fade */}
+                <div className="absolute inset-0 bg-radial from-transparent via-black/20 to-black/75 pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#09120c] via-[#09120c]/92 via-38% to-transparent pointer-events-none" />
+
+                {/* Transparent Cutout Portrait */}
+                <div className="absolute inset-x-0 top-3 h-[310px] sm:h-[330px] pointer-events-none">
+                  <Image
+                    src="/images/members/without-bg/WhatsApp_Image_2026-08-24_at_12.10.46_PM-removebg-preview.png"
+                    alt="Hamid Sultan - Deputy Event Head"
+                    fill
+                    className="object-contain object-bottom filter drop-shadow-[0_15px_30px_rgba(0,0,0,0.9)] group-hover:scale-105 transition-transform duration-500"
+                  />
                 </div>
-                <h4 className="text-xl font-black text-slate-900">
-                  Hamid Sultan
-                </h4>
-                <p className="text-slate-500 text-xs font-medium">
-                  Operations, Technical Tracks & Ambassador Mobilization
-                </p>
+
+                {/* Bottom Content Area */}
+                <div className="relative z-10 p-6 sm:p-7 text-center space-y-1.5 pointer-events-none">
+                  <h4 className="text-2xl sm:text-[26px] font-black text-white tracking-tight leading-snug drop-shadow-md">
+                    Hamid Sultan
+                  </h4>
+
+                  <p className="text-[11px] sm:text-xs font-black uppercase tracking-[0.22em] text-emerald-400 drop-shadow-[0_0_12px_rgba(52,211,153,0.4)]">
+                    Deputy Event Head
+                  </p>
+
+                  <p className="text-xs sm:text-[13px] text-slate-300 font-medium leading-relaxed max-w-[280px] mx-auto pt-1 line-clamp-3">
+                    Operations, Technical Tracks & Ambassador Mobilization
+                  </p>
+                </div>
               </div>
 
-              <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/90 shadow-md text-center space-y-2 relative overflow-hidden group hover:border-[#F26522] transition-all">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-50 text-[#F26522] text-[11px] font-black uppercase tracking-wider">
-                  <UserCheck className="w-3.5 h-3.5" />
-                  <span>Deputy Event Head</span>
+              {/* Deputy Head 2: Hiba Ali (Orange Neon Lighting) */}
+              <div className="relative w-full max-w-[320px] sm:max-w-[340px] h-[480px] sm:h-[500px] rounded-3xl overflow-hidden border border-[#F26522]/50 shadow-[0_0_40px_rgba(242,101,34,0.25)] hover:shadow-[0_0_65px_rgba(242,101,34,0.5)] hover:border-[#F26522]/80 hover:-translate-y-2 transition-all duration-500 ease-out flex flex-col justify-end group select-none">
+                {/* 3D Geometric Cube Pattern Background with Orange Glowing Lines */}
+                <div className="absolute inset-0 geometric-cube-pattern geometric-lighting-orange pointer-events-none" />
+
+                {/* Radiant Ambient Halo Light Effect Behind Person */}
+                <div className="absolute top-10 left-1/2 -translate-x-1/2 w-56 h-56 rounded-full bg-orange-500/30 blur-3xl animate-neon-pulse pointer-events-none" />
+
+                {/* Ambient Vignette and Bottom Fade */}
+                <div className="absolute inset-0 bg-radial from-transparent via-black/20 to-black/75 pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#140b07] via-[#140b07]/92 via-38% to-transparent pointer-events-none" />
+
+                {/* Transparent Cutout Portrait */}
+                <div className="absolute inset-x-0 top-3 h-[310px] sm:h-[330px] pointer-events-none">
+                  <Image
+                    src="/images/members/without-bg/WhatsApp_Image_2026-08-24_at_12.10.45_PM-removebg-preview.png"
+                    alt="Hiba Ali - Deputy Event Head"
+                    fill
+                    className="object-contain object-bottom filter drop-shadow-[0_15px_30px_rgba(0,0,0,0.9)] group-hover:scale-105 transition-transform duration-500"
+                  />
                 </div>
-                <h4 className="text-xl font-black text-slate-900">
-                  Hiba Ali
-                </h4>
-                <p className="text-slate-500 text-xs font-medium">
-                  Literary Arts, Conferences & Institutional Partnerships
-                </p>
+
+                {/* Bottom Content Area */}
+                <div className="relative z-10 p-6 sm:p-7 text-center space-y-1.5 pointer-events-none">
+                  <h4 className="text-2xl sm:text-[26px] font-black text-white tracking-tight leading-snug drop-shadow-md">
+                    Hiba Ali
+                  </h4>
+
+                  <p className="text-[11px] sm:text-xs font-black uppercase tracking-[0.22em] text-[#F26522] drop-shadow-[0_0_12px_rgba(242,101,34,0.4)]">
+                    Deputy Event Head
+                  </p>
+
+                  <p className="text-xs sm:text-[13px] text-slate-300 font-medium leading-relaxed max-w-[280px] mx-auto pt-1 line-clamp-3">
+                    Literary Arts, Conferences & Institutional Partnerships
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -163,37 +256,53 @@ export default function TeamAboutPage() {
               <div className="w-0.5 h-8 bg-slate-300" />
             </div>
 
-            {/* Level 3: Department Leads Grid */}
-            <div className="space-y-4">
-              <div className="text-center">
-                <span className="text-xs font-extrabold text-slate-400 uppercase tracking-widest">
+            {/* Level 3: Department Leads Grid (Green Portrait Cards matching reference) */}
+            <div className="space-y-6">
+              <div className="text-center space-y-1.5">
+                <span className="text-xs font-black text-[#167C38] uppercase tracking-[0.2em]">
                   Departmental Operational Committees
                 </span>
+                <h3 className="text-2xl sm:text-3xl font-black text-slate-900">
+                  Department Leads & Committee Directors
+                </h3>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
                 {DEPARTMENT_LEADS.map((dept) => (
                   <div
-                    key={dept.department}
-                    className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs hover:shadow-lg transition-all duration-300 space-y-3 flex flex-col justify-between"
+                    key={dept.name}
+                    className="relative w-full h-[470px] sm:h-[500px] rounded-3xl overflow-hidden bg-gradient-to-b from-[#1c8346] via-[#106232] to-[#06391a] border border-emerald-400/25 shadow-[0_15px_35px_rgba(6,57,26,0.3)] hover:shadow-[0_25px_50px_rgba(6,57,26,0.5)] hover:-translate-y-2 transition-all duration-500 ease-out flex flex-col justify-end group select-none"
                   >
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-black text-[#003B96] uppercase tracking-wider bg-blue-50 px-2.5 py-1 rounded-lg">
-                          {dept.lead}
-                        </span>
-                      </div>
-                      <h4 className="text-base font-black text-slate-900 leading-snug">
-                        {dept.department}
-                      </h4>
-                      <p className="text-xs text-slate-500 font-medium leading-relaxed">
-                        {dept.scope}
-                      </p>
+                    {/* Top Portrait Image with Grayscale and Zoom Effect */}
+                    <div className="absolute inset-0 w-full h-full">
+                      <Image
+                        src={dept.image}
+                        alt={dept.name}
+                        fill
+                        className="object-cover object-top filter grayscale contrast-115 brightness-95 group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700 ease-out"
+                      />
+                      {/* Top Soft Green Ambient Blend */}
+                      <div className="absolute inset-0 bg-gradient-to-b from-[#1c8346]/40 via-transparent to-transparent pointer-events-none" />
+                      {/* Bottom Deep Green Fade for crystal-clear text readability */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#063317] via-[#063317]/95 via-42% to-transparent pointer-events-none" />
                     </div>
 
-                    <div className="pt-2 border-t border-slate-100 flex items-center gap-1 text-[11px] font-bold text-slate-400">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>Dedicated On-Site Team</span>
+                    {/* Bottom Content Area */}
+                    <div className="relative z-10 p-6 sm:p-7 text-center space-y-1.5 pointer-events-none">
+                      {/* Name */}
+                      <h4 className="text-2xl sm:text-[26px] font-black text-white tracking-tight leading-snug drop-shadow-md">
+                        {dept.name}
+                      </h4>
+
+                      {/* Designation */}
+                      <p className="text-[11px] sm:text-xs font-extrabold uppercase tracking-[0.22em] text-emerald-200 drop-shadow-xs">
+                        {dept.lead}
+                      </p>
+
+                      {/* Scope / Description */}
+                      <p className="text-xs sm:text-[13px] text-white/80 font-medium leading-relaxed max-w-[280px] mx-auto pt-1 line-clamp-3">
+                        {dept.scope}
+                      </p>
                     </div>
                   </div>
                 ))}

@@ -1,11 +1,8 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
-import { motion, useScroll, useSpring, useTransform, useMotionValueEvent } from "framer-motion";
+import Image from "next/image";
 import { ArrowRight, Sparkles, Trophy } from "lucide-react";
-import DateVenueBadge from "./DateVenueBadge";
 import PresentedByBanner from "./PresentedByBanner";
-import HeroFrameCanvas from "./HeroFrameCanvas";
 
 interface HeroSectionProps {
   onExploreClick?: () => void;
@@ -13,312 +10,241 @@ interface HeroSectionProps {
   onLoadingProgress?: (progress: number) => void;
 }
 
+const STUDENT_AVATARS = [
+  "/images/members/WhatsApp Image 2026-08-24 at 12.10.43 PM.jpeg",
+  "/images/members/WhatsApp Image 2026-08-24 at 12.10.44 PM.jpeg",
+  "/images/members/WhatsApp Image 2026-08-24 at 12.10.45 PM.jpeg",
+  "/images/members/WhatsApp Image 2026-08-24 at 12.10.46 PM.jpeg",
+];
+
 export default function HeroSection({
   onExploreClick,
   onRegisterClick,
-  onLoadingProgress,
 }: HeroSectionProps) {
-  const containerRef = useRef<HTMLElement>(null);
-  const [currentScrollProgress, setCurrentScrollProgress] = useState(0);
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-
-  // Check prefers-reduced-motion & screen size
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-      setPrefersReducedMotion(mediaQuery.matches);
-
-      const checkScreen = () => {
-        setIsMobile(window.innerWidth < 768);
-      };
-      checkScreen();
-
-      const handleChange = (e: MediaQueryListEvent) => {
-        setPrefersReducedMotion(e.matches);
-      };
-
-      mediaQuery.addEventListener("change", handleChange);
-      window.addEventListener("resize", checkScreen);
-      return () => {
-        mediaQuery.removeEventListener("change", handleChange);
-        window.removeEventListener("resize", checkScreen);
-      };
-    }
-  }, []);
-
-  // Track scroll position across the hero runway
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"],
-  });
-
-  const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 120,
-    damping: 30,
-    restDelta: 0.0005,
-  });
-
-  // Sync motion value with canvas scroll progress state
-  useMotionValueEvent(smoothProgress, "change", (latest) => {
-    setCurrentScrollProgress(latest);
-  });
-
-  // Desktop typography gentle parallax and fade towards end of runway
-  const desktopTextY = useTransform(smoothProgress, [0, 0.7, 1], ["0%", "-4%", "-15%"]);
-  const desktopTextOpacity = useTransform(smoothProgress, [0, 0.7, 0.95, 1], [1, 1, 0.6, 0.1]);
-  const desktopTextScale = useTransform(smoothProgress, [0, 0.7, 1], [1, 1.02, 0.98]);
-
-  // Mobile typography dynamic on-scroll pop parallax (100% razor-sharp, zero text blur)
-  const mobileTextY = useTransform(smoothProgress, [0, 0.35, 0.75, 1], ["0%", "-3%", "-10%", "-22%"]);
-  const mobileTextScale = useTransform(smoothProgress, [0, 0.2, 0.6, 1], [1, 1.04, 0.98, 0.9]);
-  const mobileTextOpacity = useTransform(smoothProgress, [0, 0.65, 0.9, 1], [1, 0.95, 0.4, 0]);
-
-  // Mobile background on-scroll blur-up & zoom effect (creates depth behind crisp text)
-  const mobileBgBlur = useTransform(smoothProgress, [0, 0.45, 0.9], ["blur(0px)", "blur(6px)", "blur(14px)"]);
-  const mobileBgScale = useTransform(smoothProgress, [0, 0.5, 1], [1, 1.05, 1.1]);
-  const mobileBgOpacity = useTransform(smoothProgress, [0, 0.7, 1], [1, 0.85, 0.35]);
-
-  // Bottom banner fade out slightly as we scroll down
-  const bannerOpacity = useTransform(smoothProgress, [0, 0.6, 0.9, 1], [1, 0.95, 0.5, 0]);
-  const bannerY = useTransform(smoothProgress, [0, 0.8, 1], ["0%", "5%", "15%"]);
-
-  // Staggered popping entrance animation variants for crisp text
-  const popWordVariants = {
-    hidden: { scale: 0.72, opacity: 0, y: 28 },
-    visible: (custom: number) => ({
-      scale: 1,
-      opacity: 1,
-      y: 0,
-      transition: {
-        type: "spring" as const,
-        stiffness: 380,
-        damping: 18,
-        delay: 0.12 + custom * 0.09,
-      },
-    }),
-  };
-
-  const popBadgeVariants = {
-    hidden: { scale: 0.75, opacity: 0, y: -16 },
-    visible: {
-      scale: 1,
-      opacity: 1,
-      y: 0,
-      transition: {
-        type: "spring" as const,
-        stiffness: 360,
-        damping: 20,
-        delay: 0.08,
-      },
-    },
-  };
-
-  const popItemVariants = {
-    hidden: { scale: 0.82, opacity: 0, y: 24 },
-    visible: (custom: number) => ({
-      scale: 1,
-      opacity: 1,
-      y: 0,
-      transition: {
-        type: "spring" as const,
-        stiffness: 350,
-        damping: 20,
-        delay: 0.45 + custom * 0.1,
-      },
-    }),
-  };
-
   return (
-    <section
-      ref={containerRef}
-      className={`relative w-full ${isMobile ? "h-[160vh]" : "h-[220vh] sm:h-[260vh]"} bg-slate-900 select-none`}
-    >
-      {/* Pinned Sticky Viewport Stage */}
-      <div className="sticky top-0 h-screen w-full flex flex-col justify-between overflow-hidden pt-4 sm:pt-8 pb-4 sm:pb-6">
+    <section className="relative w-full bg-white text-slate-900 overflow-hidden select-none border-b border-slate-200/80">
+      
+      {/* ================= GEOMETRIC BACKGROUND: WHITE BG WITH BLUE & ORANGE DOTS AND LINES ================= */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
         
-        {/* Background Stage Canvas & Ambient Lighting (Zero blur on desktop, mobile-only on-scroll blur) */}
-        <motion.div
-          className="absolute inset-0 z-0 pointer-events-none will-change-transform"
-          style={
-            isMobile && !prefersReducedMotion
-              ? {
-                  filter: mobileBgBlur,
-                  scale: mobileBgScale,
-                  opacity: mobileBgOpacity,
-                }
-              : {
-                  filter: "none",
-                }
-          }
+        {/* Soft Ambient Radial Warmth Tints */}
+        <div className="absolute -top-20 left-1/4 w-[650px] h-[650px] bg-[radial-gradient(circle,rgba(242,101,34,0.06)_0%,transparent_70%)]" />
+        <div className="absolute -bottom-20 right-1/4 w-[650px] h-[650px] bg-[radial-gradient(circle,rgba(0,59,150,0.05)_0%,transparent_70%)]" />
+
+        {/* SVG Matrix Dot Grids and Geometric Circuit Lines */}
+        <svg
+          className="absolute inset-0 w-full h-full"
+          xmlns="http://www.w3.org/2000/svg"
         >
-          {/* Hero Frame Canvas: Plays 260 crisp interactive frames on desktop; static poster on mobile */}
-          <HeroFrameCanvas
-            scrollProgress={prefersReducedMotion ? 0 : currentScrollProgress}
-            onLoadingProgress={onLoadingProgress}
-            isMobile={isMobile}
-            className="w-full h-full"
+          <defs>
+            {/* Orange Dot Matrix Pattern */}
+            <pattern
+              id="hero-dots-orange"
+              width="24"
+              height="24"
+              patternUnits="userSpaceOnUse"
+            >
+              <circle cx="2" cy="2" r="1.3" fill="#F26522" opacity="0.45" />
+            </pattern>
+
+            {/* Blue Dot Matrix Pattern */}
+            <pattern
+              id="hero-dots-blue"
+              width="24"
+              height="24"
+              patternUnits="userSpaceOnUse"
+            >
+              <circle cx="2" cy="2" r="1.3" fill="#003B96" opacity="0.4" />
+            </pattern>
+
+            {/* Gradient Masks to smoothly fade out the dot clusters */}
+            <radialGradient id="dots-fade-left" cx="0%" cy="50%" r="70%">
+              <stop offset="0%" stopColor="white" stopOpacity="0.85" />
+              <stop offset="60%" stopColor="white" stopOpacity="0.4" />
+              <stop offset="100%" stopColor="white" stopOpacity="0" />
+            </radialGradient>
+
+            <radialGradient id="dots-fade-right" cx="100%" cy="50%" r="70%">
+              <stop offset="0%" stopColor="white" stopOpacity="0.85" />
+              <stop offset="60%" stopColor="white" stopOpacity="0.4" />
+              <stop offset="100%" stopColor="white" stopOpacity="0" />
+            </radialGradient>
+          </defs>
+
+          {/* Left Orange Dotted Grid */}
+          <rect
+            x="0"
+            y="0"
+            width="45%"
+            height="100%"
+            fill="url(#hero-dots-orange)"
+            mask="url(#dots-fade-left-mask)"
+            style={{
+              maskImage: "radial-gradient(ellipse at 15% 45%, black 20%, transparent 75%)",
+              WebkitMaskImage: "radial-gradient(ellipse at 15% 45%, black 20%, transparent 75%)",
+            }}
           />
 
-          {/* Left Gradient Overlay for crisp contrast and readability of hero text */}
-          <div className="absolute inset-0 bg-gradient-to-r from-white/90 via-white/60 to-transparent md:w-1/2 pointer-events-none" />
+          {/* Right Blue Dotted Grid */}
+          <rect
+            x="55%"
+            y="0"
+            width="45%"
+            height="100%"
+            fill="url(#hero-dots-blue)"
+            style={{
+              maskImage: "radial-gradient(ellipse at 85% 55%, black 20%, transparent 75%)",
+              WebkitMaskImage: "radial-gradient(ellipse at 85% 55%, black 20%, transparent 75%)",
+            }}
+          />
 
-          {/* Subtle Bottom & Top Vignette Gradients */}
-          <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-white/70 to-transparent pointer-events-none" />
-          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-slate-50 via-slate-50/70 to-transparent pointer-events-none" />
-        </motion.div>
+          {/* ================= TECHNICAL GEOMETRIC LINES (Matching Sheryians layout) ================= */}
+          
+          {/* Top-Left Angular Circuit Line */}
+          <path
+            d="M -20 120 L 160 120 L 240 200 L 240 380 L 180 440 L 40 440"
+            fill="none"
+            stroke="#F26522"
+            strokeWidth="1.5"
+            opacity="0.35"
+          />
 
-        {/* Main Hero Content Area */}
-        <div className="relative z-10 w-full px-4 sm:px-8 lg:px-12 xl:px-16 pt-2 sm:pt-4">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            
-            {/* Left Hero Headlines & Metadata (100% Crisp - Zero Blur on Desktop & Mobile) */}
-            <motion.div
-              className="lg:col-span-7 xl:col-span-6 space-y-3 sm:space-y-4 text-left will-change-transform"
-              style={
-                prefersReducedMotion
-                  ? { filter: "none" }
-                  : isMobile
-                  ? {
-                      y: mobileTextY,
-                      opacity: mobileTextOpacity,
-                      scale: mobileTextScale,
-                      filter: "none",
-                      transformOrigin: "top left",
-                    }
-                  : {
-                      y: desktopTextY,
-                      opacity: desktopTextOpacity,
-                      scale: desktopTextScale,
-                      filter: "none",
-                      transformOrigin: "top left",
-                    }
-              }
-            >
-              {/* Tag Badge with Pop Entrance */}
-              <motion.div
-                variants={popBadgeVariants}
-                initial="hidden"
-                animate="visible"
-                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-100/90 text-[#003B96] text-xs font-black uppercase tracking-widest border border-blue-200 shadow-xs backdrop-blur-xs active:scale-95 transition-transform"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-[#F26522] animate-pulse" />
-                <span>The Flagship Pre-Event of Islamabad</span>
-              </motion.div>
+          {/* Top-Right Angular Circuit Line */}
+          <path
+            d="M 1940 120 L 1440 120 L 1360 200 L 1360 380 L 1420 440 L 1560 440"
+            fill="none"
+            stroke="#003B96"
+            strokeWidth="1.5"
+            opacity="0.3"
+          />
 
-              {/* Bold Multi-colored Main Title with Staggered Word Popping */}
-              <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-[76px] font-black tracking-tight leading-[0.95] select-none">
-                <motion.span
-                  custom={0}
-                  variants={popWordVariants}
-                  initial="hidden"
-                  animate="visible"
-                  className="block text-[#003B96] drop-shadow-xs origin-left will-change-transform"
-                >
-                  CAPITAL
-                </motion.span>
-                <motion.span
-                  custom={1}
-                  variants={popWordVariants}
-                  initial="hidden"
-                  animate="visible"
-                  className="block text-[#167C38] drop-shadow-xs origin-left will-change-transform"
-                >
-                  YOUTH EXPO
-                </motion.span>
-                <motion.span
-                  custom={2}
-                  variants={popWordVariants}
-                  initial="hidden"
-                  animate="visible"
-                  className="block text-[#F26522] drop-shadow-xs origin-left will-change-transform"
-                >
-                  PRE EVENT
-                </motion.span>
-                <motion.span
-                  custom={3}
-                  variants={popWordVariants}
-                  initial="hidden"
-                  animate="visible"
-                  className="block text-[#003B96] drop-shadow-xs origin-left will-change-transform"
-                >
-                  AT BUIC
-                </motion.span>
-              </h1>
+          {/* Diagonal 45-Degree Accents */}
+          <line
+            x1="120"
+            y1="60"
+            x2="320"
+            y2="260"
+            stroke="#003B96"
+            strokeWidth="1.2"
+            opacity="0.25"
+            strokeDasharray="6 6"
+          />
+          <line
+            x1="1480"
+            y1="60"
+            x2="1280"
+            y2="260"
+            stroke="#F26522"
+            strokeWidth="1.2"
+            opacity="0.3"
+            strokeDasharray="6 6"
+          />
 
-              {/* Date & Venue Info Badges with Pop Animation */}
-              <motion.div
-                custom={0}
-                variants={popItemVariants}
-                initial="hidden"
-                animate="visible"
-              >
-                <DateVenueBadge />
-              </motion.div>
+          {/* Subtle Technical Crosshairs (+) at Coordinate Intersections */}
+          <g transform="translate(160, 120)" stroke="#F26522" strokeWidth="1.5" opacity="0.6">
+            <line x1="-6" y1="0" x2="6" y2="0" />
+            <line x1="0" y1="-6" x2="0" y2="6" />
+          </g>
+          <g transform="translate(240, 200)" stroke="#003B96" strokeWidth="1.5" opacity="0.5">
+            <line x1="-5" y1="0" x2="5" y2="0" />
+            <line x1="0" y1="-5" x2="0" y2="5" />
+          </g>
+          <g transform="translate(1440, 120)" stroke="#003B96" strokeWidth="1.5" opacity="0.6">
+            <line x1="-6" y1="0" x2="6" y2="0" />
+            <line x1="0" y1="-6" x2="0" y2="6" />
+          </g>
+          <g transform="translate(1360, 200)" stroke="#F26522" strokeWidth="1.5" opacity="0.6">
+            <line x1="-5" y1="0" x2="5" y2="0" />
+            <line x1="0" y1="-5" x2="0" y2="5" />
+          </g>
 
-              {/* Dual CTA Buttons with Pop Animation */}
-              <motion.div
-                custom={1}
-                variants={popItemVariants}
-                initial="hidden"
-                animate="visible"
-                className="flex flex-wrap items-center gap-3 sm:gap-4 pt-1 sm:pt-2"
-              >
-                <button
-                  onClick={onRegisterClick}
-                  className="inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-3 sm:py-3.5 rounded-full text-xs sm:text-sm font-black text-white bg-gradient-to-r from-[#F97316] via-[#EA580C] to-[#C2410C] hover:from-[#EA580C] hover:to-[#9A3412] cye-glow-orange transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg cursor-pointer active:scale-95"
-                >
-                  <Trophy className="w-4 h-4" />
-                  <span>Register for Competitions</span>
-                  <ArrowRight className="w-4 h-4 ml-1" />
-                </button>
+          {/* Small Crosshairs Near the Bottom */}
+          <g transform="translate(280, 520)" stroke="#003B96" strokeWidth="1.2" opacity="0.4">
+            <line x1="-5" y1="0" x2="5" y2="0" />
+            <line x1="0" y1="-5" x2="0" y2="5" />
+          </g>
+          <g transform="translate(1320, 520)" stroke="#F26522" strokeWidth="1.2" opacity="0.4">
+            <line x1="-5" y1="0" x2="5" y2="0" />
+            <line x1="0" y1="-5" x2="0" y2="5" />
+          </g>
+        </svg>
+      </div>
 
-                <a
-                  href="#explore"
-                  onClick={(e) => {
-                    if (onExploreClick) {
-                      e.preventDefault();
-                      onExploreClick();
-                    }
-                  }}
-                  className="inline-flex items-center gap-2.5 sm:gap-3 text-slate-800 hover:text-[#003B96] font-bold text-xs sm:text-base group transition-colors cursor-pointer px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-full hover:bg-white/80 backdrop-blur-xs active:scale-95"
-                >
-                  <span>Explore Tracks</span>
-                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-slate-300 bg-white/90 flex items-center justify-center group-hover:border-[#003B96] group-hover:bg-[#003B96] group-hover:text-white transition-all duration-300 shadow-xs">
-                    <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform group-hover:translate-x-1" />
-                  </div>
-                </a>
-              </motion.div>
-            </motion.div>
-
-            {/* Right Spacer for 3D Interactive Model Visual on Desktop */}
-            <div className="hidden lg:block lg:col-span-5 xl:col-span-6 min-h-[220px]" />
-          </div>
+      {/* ================= MAIN HERO CONTENT (SHERYIANS REFERENCE LAYOUT) ================= */}
+      <div className="relative z-10 w-full px-4 sm:px-8 lg:px-12 xl:px-16 pt-20 sm:pt-28 pb-12 sm:pb-16 flex flex-col items-center text-center">
+        
+        {/* 1. Top Eyebrow Tag */}
+        <div className="mb-5 sm:mb-6">
+          <span className="text-[#F26522] font-mono font-bold text-xs sm:text-sm uppercase tracking-[0.28em] inline-flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#F26522] animate-ping" />
+            ENGAGE. ENCOURAGE. EMPOWER.
+          </span>
         </div>
 
-        {/* Floating Presented By Sub-Hero Banner */}
-        <motion.div
-          className="relative z-20 mt-auto pt-2 will-change-transform"
-          style={
-            prefersReducedMotion
-              ? {}
-              : {
-                  opacity: bannerOpacity,
-                  y: bannerY,
-                }
-          }
-        >
-          <PresentedByBanner />
+        {/* 2. Main Headline with Bounding Corner Box around Highlighted Word */}
+        <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-[76px] font-black text-slate-950 tracking-tight leading-[1.06] max-w-5xl mx-auto font-display mb-6">
+          Become The Next Champion That{" "}
+          <span className="relative inline-block px-3 sm:px-5 py-0.5 mx-1 text-slate-950 border-2 border-[#F26522] rounded-md bg-orange-50/60 shadow-xs">
+            Pakistan
+            {/* 4 Corner Anchor Handles (Signature Detail from Reference Screenshot) */}
+            <span className="absolute -top-1.5 -left-1.5 w-2.5 h-2.5 bg-[#F26522] rounded-xs" />
+            <span className="absolute -top-1.5 -right-1.5 w-2.5 h-2.5 bg-[#F26522] rounded-xs" />
+            <span className="absolute -bottom-1.5 -left-1.5 w-2.5 h-2.5 bg-[#F26522] rounded-xs" />
+            <span className="absolute -bottom-1.5 -right-1.5 w-2.5 h-2.5 bg-[#F26522] rounded-xs" />
+          </span>{" "}
+          Is Waiting For!
+        </h1>
 
-          {/* Explore What Awaits You Section Indicator */}
-          <div className="flex items-center justify-center gap-2.5 sm:gap-3 pt-3 pb-1 text-[10px] sm:text-xs font-black text-slate-600 uppercase tracking-widest select-none">
-            <span className="w-8 sm:w-12 h-[2px] bg-gradient-to-r from-transparent to-[#003B96]" />
-            <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#003B96]" />
-            <span className="text-slate-900 font-extrabold">EXPLORE WHAT AWAITS YOU</span>
-            <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#F26522]" />
-            <span className="w-8 sm:w-12 h-[2px] bg-gradient-to-l from-transparent to-[#F26522]" />
+        {/* 3. Subtitle Paragraph */}
+        <p className="text-slate-600 text-sm sm:text-base md:text-lg max-w-2xl mx-auto leading-relaxed font-medium mb-7">
+          Join a growing community of collegiate innovators, gamers, and orators preparing for real-world excellence at Capital Youth Expo (BUIC • 1st Oct 2026).
+        </p>
+
+        {/* 4. Social Proof / Student Avatars Row (Exact match to Sheryians reference) */}
+        <div className="flex flex-wrap items-center justify-center gap-3 mb-8">
+          <div className="flex -space-x-2.5 overflow-hidden p-0.5">
+            {STUDENT_AVATARS.map((src, index) => (
+              <div
+                key={index}
+                className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-full ring-2 ring-white overflow-hidden shadow-xs"
+              >
+                <Image
+                  src={src}
+                  alt={`Student Ambassador ${index + 1}`}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            ))}
           </div>
-        </motion.div>
+
+          <span className="text-xs sm:text-sm text-slate-700 font-semibold font-sans">
+            <strong className="text-[#F26522] font-black">80,000+</strong> Students learning & competing across 40+ universities
+          </span>
+        </div>
+
+        {/* 5. Primary Action Button ("Start Journey →" Style) */}
+        <div className="flex flex-wrap items-center justify-center gap-3.5 sm:gap-4 mb-14">
+          <button
+            onClick={onRegisterClick}
+            className="group relative inline-flex items-center justify-center gap-2 px-8 sm:px-9 py-3.5 sm:py-4 rounded-2xl sm:rounded-full text-sm sm:text-base font-black text-white bg-gradient-to-r from-[#F26522] via-[#EA580C] to-[#C2410C] hover:from-[#EA580C] hover:to-[#9A3412] hover:scale-105 active:scale-98 transition-all duration-300 shadow-xl shadow-orange-500/25 cursor-pointer"
+          >
+            <span>Start Journey</span>
+            <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1.5" />
+          </button>
+
+          <button
+            onClick={onExploreClick}
+            className="inline-flex items-center justify-center gap-2 px-7 sm:px-8 py-3.5 sm:py-4 rounded-2xl sm:rounded-full text-sm sm:text-base font-bold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200/90 hover:border-[#003B96] hover:text-[#003B96] active:scale-98 transition-all duration-300 shadow-xs cursor-pointer"
+          >
+            <span>Explore 9 Tracks</span>
+          </button>
+        </div>
+
+        {/* 6. Presented By Banner */}
+        <div className="w-full max-w-4xl mx-auto pt-2 border-t border-slate-100">
+          <PresentedByBanner />
+        </div>
 
       </div>
     </section>

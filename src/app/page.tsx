@@ -1,157 +1,154 @@
 "use client";
 
-import { useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
-  Code,
-  Trophy,
-  Gamepad2,
-  Mic,
-  ArrowRight,
-  MapPin,
-  Calendar,
-  Users,
-  Award,
-  ChevronDown,
-  Plus,
   Sparkles,
-  BookOpen,
-  Palette,
-  Flame,
-  Clock,
-  Compass,
   Briefcase,
+  Zap,
+  Target,
+  ChevronRight,
 } from "lucide-react";
+
+import dynamic from "next/dynamic";
 
 import Header from "@/components/layout/Header";
 import HeroSection from "@/components/hero/HeroSection";
+import PillarsHorizontalScrollSection from "@/components/home/PillarsHorizontalScrollSection";
+import InteractiveSpotlightTextSection from "@/components/home/InteractiveSpotlightTextSection";
 import CategoriesScrollSection from "@/components/home/CategoriesScrollSection";
 import SponsorsMarqueeSection from "@/components/home/SponsorsMarqueeSection";
 import RecapCoverflowSection from "@/components/home/RecapCoverflowSection";
-import RegisterModal from "@/components/registration/RegisterModal";
+import HumanAISynergySection from "@/components/home/HumanAISynergySection";
 import Footer from "@/components/layout/Footer";
-import GlassCompetitionCard from "@/components/cards/GlassCompetitionCard";
 import { COMPETITIONS_LIST } from "@/lib/api";
 
-const COMPETITION_DETAILS = [
-  {
-    title: "Speed Programming",
-    track: "Technology",
-    icon: Code,
-    color: "from-blue-600 to-indigo-700",
-    bgLight: "bg-blue-50 text-blue-600",
-    badge: "Algo & Logic",
-    desc: "Solve intense algorithmic problems in C++, Python, or Java under tight time constraints.",
-    team: "Individual / Duo",
-    prize: "Trophy + Gold Medals",
-  },
-  {
-    title: "Mini Hackathon",
-    track: "Technology",
-    icon: Trophy,
-    color: "from-orange-500 to-amber-600",
-    bgLight: "bg-orange-50 text-orange-600",
-    badge: "Build & Pitch",
-    desc: "Collaborate in fast-paced teams to build innovative software solutions and pitch live to judges.",
-    team: "2 - 4 Members",
-    prize: "Winner Shield + Mentorship",
-  },
-  {
-    title: "Counter-Strike 2",
-    track: "Esports & Gaming",
-    icon: Gamepad2,
-    color: "from-purple-600 to-violet-800",
-    bgLight: "bg-purple-50 text-purple-600",
-    badge: "5v5 Knockout",
-    desc: "Showcase tactical prowess, aim precision, and team communication in an adrenaline-pumping tournament.",
-    team: "5 Players Roster",
-    prize: "Esports Trophy + Gaming Merch",
-  },
-  {
-    title: "Speech & Seerah Quiz",
-    track: "Literary & Oration",
-    icon: Mic,
-    color: "from-emerald-600 to-teal-700",
-    bgLight: "bg-emerald-50 text-emerald-600",
-    badge: "Eloquence & Knowledge",
-    desc: "Demonstrate inspiring public speaking rhetoric and profound knowledge of Islamic history and Seerah.",
-    team: "Individual Entry",
-    prize: "Honor Shield + Certificates",
-  },
-  {
-    title: "Essay & Short Story Writing",
-    track: "Literary Arts",
-    icon: BookOpen,
-    color: "from-rose-600 to-red-700",
-    bgLight: "bg-rose-50 text-rose-600",
-    badge: "Creative Expression",
-    desc: "Craft compelling essays and creative short narratives judged on originality, structure, and depth.",
-    team: "Individual Entry",
-    prize: "Author Shield + Publication",
-  },
-  {
-    title: "Painting & Visual Arts",
-    track: "Fine Art",
-    icon: Palette,
-    color: "from-amber-500 to-yellow-600",
-    bgLight: "bg-amber-50 text-amber-600",
-    badge: "Visual Canvas",
-    desc: "Express creative vision through live painting and visual artworks on themes of hope, unity, and future.",
-    team: "Individual Entry",
-    prize: "Artist Shield + Art Kit",
-  },
-];
-
-const MASTER_PLAN_STAGES = [
-  {
-    stage: "Stage 1",
-    title: "Ambassador & Volunteer Drive",
-    desc: "Online registration & interview screening to select enthusiastic campus representatives.",
-    tag: "Recruitment",
-    color: "bg-blue-600 text-white",
-  },
-  {
-    stage: "Stage 2",
-    title: "Ambassadors Meetup & Briefing",
-    desc: "Initial orientation session, distribution of promotional toolkits, and role assignments.",
-    tag: "Orientation",
-    color: "bg-emerald-600 text-white",
-  },
-  {
-    stage: "Stage 3",
-    title: "Registrations & Campus Desk Campaigns",
-    desc: "Setting up registration desks and conducting class-to-class campaigns across universities.",
-    tag: "Outreach",
-    color: "bg-orange-500 text-white",
-  },
-  {
-    stage: "Stage 4",
-    title: "MoU Signing & Partnerships",
-    desc: "Formalizing strategic collaborations with student societies, industry leaders, and academic sponsors.",
-    tag: "Strategic",
-    color: "bg-indigo-600 text-white",
-  },
-  {
-    stage: "Stage 5",
-    title: "Pre-Event Strategy Session",
-    desc: "Final logistics review, stage management rehearsals, and security protocols alignment.",
-    tag: "Readiness",
-    color: "bg-purple-600 text-white",
-  },
-  {
-    stage: "Stage 6",
-    title: "Main Event: Competitions & Conferences",
-    desc: "Parallel competitive tracks, CYE Nexus, and Career Pro Talks held live at BUIC E-8 on 1st Oct 2026.",
-    tag: "Grand Expo",
-    color: "bg-[#F26522] text-white",
-  },
-];
+const RegisterModal = dynamic(
+  () => import("@/components/registration/RegisterModal"),
+  { ssr: false }
+);
 
 export default function Home() {
   const [registerOpen, setRegisterOpen] = useState(false);
   const [selectedComp, setSelectedComp] = useState<string>(COMPETITIONS_LIST[0]);
+
+  const mainRef = useRef<HTMLElement>(null);
+  const [passTilt, setPassTilt] = useState({ rx: 0, ry: 0, px: 50, py: 50 });
+
+  const handlePassMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const rx = -((y - rect.height / 2) / (rect.height / 2)) * 14;
+    const ry = ((x - rect.width / 2) / (rect.width / 2)) * 14;
+    setPassTilt({
+      rx,
+      ry,
+      px: Math.round((x / rect.width) * 100),
+      py: Math.round((y / rect.height) * 100),
+    });
+  };
+
+  const handlePassMouseLeave = () => {
+    setPassTilt({ rx: 0, ry: 0, px: 50, py: 50 });
+  };
+
+  // Senior Animation Choreographer: Descend-on-scroll & dynamic depth triggers
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    gsap.registerPlugin(ScrollTrigger);
+
+    const mainEl = mainRef.current;
+    if (!mainEl) return;
+
+    const ctx = gsap.context(() => {
+
+
+      // -------------------------------------------------------------
+      // 2. CONFERENCES & KEYNOTES (#conferences)
+      // -------------------------------------------------------------
+      gsap.to(".conf-orb-1", {
+        yPercent: 25,
+        ease: "none",
+        scrollTrigger: {
+          trigger: "#conferences",
+          start: "top bottom",
+          end: "bottom top",
+          scrub: 1.2,
+        },
+      });
+      gsap.to(".conf-orb-2", {
+        yPercent: -25,
+        ease: "none",
+        scrollTrigger: {
+          trigger: "#conferences",
+          start: "top bottom",
+          end: "bottom top",
+          scrub: 1.2,
+        },
+      });
+
+      // Left Column Descend
+      gsap.fromTo(
+        ".conf-descend",
+        { y: -45, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          stagger: 0.12,
+          duration: 0.9,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: "#conferences",
+            start: "top 80%",
+            toggleActions: "play none none reverse",
+          },
+        }
+      );
+
+      // Keynote Topic Cards Descend
+      gsap.fromTo(
+        ".conf-card-item",
+        { y: -40, opacity: 0, scale: 0.96 },
+        {
+          y: 0,
+          opacity: 1,
+          scale: 1,
+          stagger: 0.14,
+          duration: 0.85,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: ".conf-cards-row",
+            start: "top 85%",
+            toggleActions: "play none none reverse",
+          },
+        }
+      );
+
+      // Right Column 3D Holographic Pass Card Descend
+      gsap.fromTo(
+        ".conf-pass-card",
+        { y: -65, opacity: 0, rotateX: 12, transformPerspective: 1000 },
+        {
+          y: 0,
+          opacity: 1,
+          rotateX: 0,
+          duration: 1.1,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: ".conf-pass-card",
+            start: "top 85%",
+            toggleActions: "play none none reverse",
+          },
+        }
+      );
+
+
+    }, mainEl);
+
+    return () => ctx.revert();
+  }, []);
 
   const handleOpenRegister = (competitionName?: string) => {
     if (competitionName) {
@@ -161,110 +158,144 @@ export default function Home() {
   };
 
   const scrollToExplore = () => {
-    const el = document.getElementById("explore");
+    const el = document.getElementById("categories") || document.getElementById("conferences");
     if (el) {
       el.scrollIntoView({ behavior: "smooth" });
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50">
+    <div className="min-h-screen flex flex-col bg-[#060913] text-slate-100 selection:bg-[#167C38] selection:text-white">
       {/* Header Bar */}
       <Header onOpenRegister={() => handleOpenRegister()} />
 
-      <main className="flex-1">
-        {/* 1. Main Hero Section */}
+      <main ref={mainRef} className="flex-1">
+        {/* 1. Main Hero Section (Lightweight, zero scroll pins/canvas frame scrubbers, clean white circuit & dot matrix) */}
         <HeroSection
           onExploreClick={scrollToExplore}
           onRegisterClick={() => handleOpenRegister()}
         />
 
-        {/* 2. Competitions Showcase Section */}
-        <section id="explore" className="py-20 bg-white border-b border-slate-200/80">
-          <div className="w-full px-4 sm:px-8 lg:px-12 xl:px-16">
-            <div className="text-center max-w-3xl mx-auto space-y-3 mb-14">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#003B96]/10 text-[#003B96] text-xs font-black uppercase tracking-widest">
-                <Trophy className="w-3.5 h-3.5 text-[#F26522]" />
-                <span>Competitive Tracks</span>
-              </div>
-              <h2 className="font-instrument-serif italic font-normal text-4xl sm:text-5xl lg:text-6xl text-[#167C38] tracking-normal leading-tight">
-                Featured Competitions & Events
-              </h2>
-              <p className="text-slate-500 text-sm sm:text-base font-medium">
-                Choose your field of excellence, compete with the sharpest minds in Islamabad, and earn official accolades.
-              </p>
-            </div>
+        {/* 1.5 The Four Pillars of CYE (GSAP Horizontal Cards Scroll Section with +30px height, orange drop shadow, sharp corners) */}
+        <PillarsHorizontalScrollSection onRegisterClick={handleOpenRegister} />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-              {COMPETITION_DETAILS.map((comp, idx) => (
-                <GlassCompetitionCard
-                  key={comp.title}
-                  comp={comp}
-                  onRegister={handleOpenRegister}
-                  index={idx}
-                />
-              ))}
-            </div>
+        {/* Interactive Spotlight Typography: "Capital Youth Expo" (100% width, min 50vh, Neue Machina Ultrabold local font) */}
+        <InteractiveSpotlightTextSection />
 
-            <div className="mt-12 text-center">
-              <Link
-                href="/competitions"
-                className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full text-sm font-black text-white bg-gradient-to-r from-[#003B96] to-[#002257] hover:opacity-95 shadow-md transition-all"
-              >
-                <span>View Complete Rules & All 9 Categories</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-          </div>
-        </section>
+        {/* 3. CONFERENCES & CAREER PRO TALKS (Editorial Split Stage with 3D Tilt & GSAP Descend) */}
+        <section
+          id="conferences"
+          className="section-auto-contain relative py-24 sm:py-32 bg-gradient-to-br from-[#020b18] via-[#002257] to-[#041c0f] text-white overflow-hidden border-b border-white/10 select-none"
+        >
+          {/* Radiant Ambient Radial Glows */}
+          <div className="conf-orb-1 absolute top-0 right-0 w-[550px] h-[550px] bg-[radial-gradient(circle,rgba(242,101,34,0.2)_0%,transparent_70%)] pointer-events-none will-change-transform" />
+          <div className="conf-orb-2 absolute bottom-0 left-0 w-[550px] h-[550px] bg-[radial-gradient(circle,rgba(0,59,150,0.35)_0%,transparent_70%)] pointer-events-none will-change-transform" />
 
-        {/* 3. CONFERENCES & CAREER PRO TALKS HIGHLIGHT */}
-        <section id="conferences" className="py-20 bg-gradient-to-br from-slate-900 via-[#002257] to-slate-950 text-white relative overflow-hidden">
-          <div className="w-full px-4 sm:px-8 lg:px-12 xl:px-16 relative z-10">
-            <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+          <div className="w-full px-4 sm:px-8 lg:px-12 xl:px-16 max-w-7xl mx-auto relative z-10">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 xl:gap-14 items-center">
+              {/* Left Column: Keynote Topics */}
               <div className="lg:col-span-7 space-y-6">
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 text-emerald-400 text-xs font-black uppercase tracking-widest border border-white/15">
+                <div className="conf-descend will-change-transform inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 text-emerald-400 text-xs font-mono font-bold uppercase tracking-widest border border-white/15 backdrop-blur-md shadow-xs">
                   <Briefcase className="w-3.5 h-3.5 text-[#F26522]" />
-                  <span>CYE Nexus & Career Pro Talks</span>
+                  <span>EXECUTIVE KEYNOTES & WORKSHOPS</span>
                 </div>
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight">
-                  Connect with Industry Mentors & Visionaries
+
+                <h2 className="conf-descend will-change-transform text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight text-white font-display">
+                  Direct Mentorship from Pakistan&apos;s{" "}
+                  <span className="font-instrument-serif italic font-normal text-[#F26522]">
+                    Tech Visionaries
+                  </span>
                 </h2>
-                <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-                  Running alongside the competitions, CYE Nexus and Career Pro Talks bring keynote addresses, panel discussions, and career coaching directly from Pakistan&apos;s leading tech entrepreneurs and industry luminaries.
+
+                <p className="conf-descend will-change-transform text-slate-300 text-sm sm:text-base leading-relaxed font-medium">
+                  Running parallel to competitive tracks, CYE Nexus brings keynote panels, startup founder circles, and hands-on career clinics directly to the students of Islamabad.
                 </p>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                  <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
-                    <span className="text-xs font-bold text-[#F26522] uppercase tracking-wider block">Keynote Sessions</span>
-                    <h4 className="text-base font-extrabold text-white">AI & Future Tech Horizons</h4>
-                    <p className="text-xs text-slate-400">Emerging opportunities and technical career roadmaps.</p>
+                <div className="conf-cards-row grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                  <div className="conf-card-item will-change-transform p-5 rounded-3xl bg-white/5 border border-white/15 backdrop-blur-md space-y-2 hover:border-white/35 transition-all">
+                    <div className="w-9 h-9 rounded-xl bg-orange-500/20 text-[#F26522] flex items-center justify-center font-bold">
+                      <Zap className="w-5 h-5" />
+                    </div>
+                    <span className="text-xs font-mono font-bold text-[#F26522] uppercase tracking-wider block">
+                      Keynote Series
+                    </span>
+                    <h4 className="text-base font-black text-white">
+                      AI & Deep Tech Horizons
+                    </h4>
+                    <p className="text-xs text-slate-300 leading-relaxed font-medium">
+                      Roadmaps to international tech careers, LLM engineering, and venture funding.
+                    </p>
                   </div>
-                  <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
-                    <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider block">Career Coaching</span>
-                    <h4 className="text-base font-extrabold text-white">Startup & Leadership Labs</h4>
-                    <p className="text-xs text-slate-400">Networking and guidance for ambitious student founders.</p>
+
+                  <div className="conf-card-item will-change-transform p-5 rounded-3xl bg-white/5 border border-white/15 backdrop-blur-md space-y-2 hover:border-white/35 transition-all">
+                    <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
+                      <Target className="w-5 h-5" />
+                    </div>
+                    <span className="text-xs font-mono font-bold text-emerald-400 uppercase tracking-wider block">
+                      Career Clinic
+                    </span>
+                    <h4 className="text-base font-black text-white">
+                      Startup & Founder Labs
+                    </h4>
+                    <p className="text-xs text-slate-300 leading-relaxed font-medium">
+                      Direct 1-on-1 resume reviews and seed networking for student entrepreneurs.
+                    </p>
                   </div>
                 </div>
               </div>
 
-              <div className="lg:col-span-5 bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/15 space-y-6 text-center shadow-2xl">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#F26522] to-[#EA580C] text-white flex items-center justify-center mx-auto shadow-lg">
-                  <Sparkles className="w-8 h-8" />
-                </div>
-                <div>
-                  <h3 className="text-2xl font-black text-white">Free Entry for Pre-Registered Attendees</h3>
-                  <p className="text-xs sm:text-sm text-slate-300 mt-2">
-                    Seats for the conference hall are allocated on a first-come basis. Register today to reserve your seat pass.
-                  </p>
-                </div>
-                <button
-                  onClick={() => handleOpenRegister("CYE Nexus & Career Pro Talks")}
-                  className="w-full py-4 rounded-2xl text-sm font-black text-[#003B96] bg-white hover:bg-slate-100 transition-all shadow-lg cursor-pointer flex items-center justify-center gap-2"
+              {/* Right Column: Holographic VIP Pass Card with 3D Tilt Sheen */}
+              <div className="lg:col-span-5">
+                <div
+                  onMouseMove={handlePassMouseMove}
+                  onMouseLeave={handlePassMouseLeave}
+                  style={{
+                    transform: `perspective(1000px) rotateX(${passTilt.rx}deg) rotateY(${passTilt.ry}deg)`,
+                    transition: "transform 0.12s ease-out",
+                  }}
+                  className="conf-pass-card will-change-transform relative rounded-[32px] p-8 sm:p-9 border border-white/20 bg-slate-900/85 backdrop-blur-2xl shadow-2xl space-y-6 text-center overflow-hidden group hover:border-white/40"
                 >
-                  <span>Reserve Conference Pass</span>
-                  <ArrowRight className="w-4 h-4 text-[#003B96]" />
-                </button>
+                  {/* Holographic Top Glow Sheen dynamically following cursor */}
+                  <div
+                    className="absolute inset-0 pointer-events-none opacity-40 transition-opacity duration-300 group-hover:opacity-75"
+                    style={{
+                      background: `radial-gradient(circle 280px at ${passTilt.px}% ${passTilt.py}%, rgba(242,101,34,0.35) 0%, rgba(0,59,150,0.25) 50%, transparent 80%)`,
+                    }}
+                  />
+                  <div className="absolute -top-24 -left-24 w-64 h-64 bg-[#F26522]/25 rounded-full blur-3xl group-hover:scale-125 transition-transform duration-700 pointer-events-none" />
+                  <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-[#003B96]/35 rounded-full blur-3xl group-hover:scale-125 transition-transform duration-700 pointer-events-none" />
+
+                  {/* Icon Emblem */}
+                  <div className="relative z-10 w-16 h-16 rounded-2xl bg-gradient-to-br from-[#F26522] to-[#EA580C] text-white flex items-center justify-center mx-auto shadow-xl">
+                    <Sparkles className="w-8 h-8 animate-pulse" />
+                  </div>
+
+                  <div className="relative z-10">
+                    <span className="px-3.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10.5px] font-mono font-bold uppercase tracking-widest inline-block mb-3">
+                      BUIC AUDITORIUM PASS
+                    </span>
+                    <h3 className="text-2xl sm:text-3xl font-black text-white leading-tight font-display">
+                      Free Entry for Pre-Registered Attendees
+                    </h3>
+                    <p className="text-xs sm:text-sm text-slate-300 mt-2.5 leading-relaxed font-medium">
+                      Auditorium seating is allocated on a strict first-come basis. Reserve your conference badge today.
+                    </p>
+                  </div>
+
+                  {/* Ticket Notch Aesthetic */}
+                  <div className="relative z-10 pt-2 border-t border-dashed border-white/20 flex items-center justify-between text-xs font-mono text-slate-400">
+                    <span>SEATS: 250 AVAILABLE</span>
+                    <span className="text-emerald-400 font-bold">LIVE ADMISSION</span>
+                  </div>
+
+                  <button
+                    onClick={() => handleOpenRegister("CYE Nexus & Career Pro Talks")}
+                    className="relative z-10 w-full py-4 rounded-2xl text-sm font-black text-slate-950 bg-white hover:bg-slate-100 hover:scale-[1.02] active:scale-98 transition-all shadow-xl cursor-pointer flex items-center justify-center gap-2"
+                  >
+                    <span>Reserve Conference Pass</span>
+                    <ChevronRight className="w-4 h-4 text-slate-950 stroke-[3]" />
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -279,200 +310,16 @@ export default function Home() {
         {/* 3.75 3D COVERFLOW RECAP OF CAPITAL YOUTH EXPO 2023 */}
         <RecapCoverflowSection />
 
-        {/* 4. MASTER PLAN 6-STAGE ROADMAP */}
-        <section className="py-20 bg-slate-50 border-b border-slate-200/80">
-          <div className="w-full px-4 sm:px-8 lg:px-12 xl:px-16">
-            <div className="text-center max-w-3xl mx-auto space-y-3 mb-14">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#167C38]/10 text-[#167C38] text-xs font-black uppercase tracking-widest">
-                <Compass className="w-3.5 h-3.5 text-[#167C38]" />
-                <span>Event Execution Strategy</span>
-              </div>
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight">
-                CYE 6-Stage Master Plan
-              </h2>
-              <p className="text-slate-500 text-sm sm:text-base font-medium">
-                Our structured roadmap ensuring seamless execution from student outreach to the grand expo day at BUIC.
-              </p>
-            </div>
+        {/* 3.85 HUMAN × AI SYNERGY SCROLL INTERACTION (Hand Contact & Ignited Spark) */}
+        <HumanAISynergySection />
 
-            <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {MASTER_PLAN_STAGES.map((step, idx) => (
-                <div
-                  key={step.stage}
-                  className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs hover:shadow-lg transition-all duration-300 space-y-3 relative group"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className={`px-3 py-1 rounded-xl text-xs font-black uppercase ${step.color}`}>
-                      {step.stage}
-                    </span>
-                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                      {step.tag}
-                    </span>
-                  </div>
-                  <h3 className="text-lg font-extrabold text-slate-900 leading-snug group-hover:text-[#003B96] transition-colors">
-                    {step.title}
-                  </h3>
-                  <p className="text-xs sm:text-sm text-slate-500 font-medium leading-relaxed">
-                    {step.desc}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
 
-        {/* 5. BECOME A CYE AMBASSADOR SECTION */}
-        <section className="py-20 bg-white overflow-hidden">
-          <div className="w-full px-4 sm:px-8 lg:px-12 xl:px-16">
-            <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center text-center">
-              
-              {/* Left Vector Art (Moves from Top-Left into place on scroll) */}
-              <motion.div
-                initial={{ opacity: 0, x: -90, y: -70, scale: 0.92 }}
-                whileInView={{ opacity: 1, x: 0, y: 0, scale: 1 }}
-                viewport={{ once: false, amount: 0.5 }}
-                transition={{ duration: 1.25, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-                className="hidden lg:flex lg:col-span-3 justify-center items-center will-change-transform"
-              >
-                <div className="relative w-48 h-48 xl:w-56 xl:h-56">
-                  <Image
-                    src="/images/ChatGPT Image Aug 18, 2026, 03_38_03 AM 1.png"
-                    alt="Ambassador Illustration Left"
-                    fill
-                    className="object-contain"
-                    priority
-                  />
-                </div>
-              </motion.div>
-
-              {/* Center Main Text */}
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: false, amount: 0.5 }}
-                transition={{ duration: 1.1, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
-                className="lg:col-span-6 space-y-4"
-              >
-                <span className="block text-xs font-black text-slate-800 tracking-[0.25em] uppercase">
-                  LEAD YOUR CAMPUS
-                </span>
-
-                <div className="space-y-0">
-                  <h2 className="text-6xl sm:text-7xl font-black tracking-tight leading-none">
-                    <span className="text-[#003B96]">C</span>
-                    <span className="text-[#167C38]">Y</span>
-                    <span className="text-[#F26522]">E</span>
-                  </h2>
-                  <h3 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight leading-tight uppercase">
-                    AMBASSADOR PROGRAM
-                  </h3>
-                </div>
-
-                <p className="text-xs sm:text-sm text-slate-600 max-w-lg mx-auto font-medium leading-relaxed">
-                  Represent Capital Youth Expo Pre-Event at BUIC on{" "}
-                  <strong className="text-slate-900 font-bold">1st October 2026</strong>{" "}
-                  and lead the vanguard of youth change in your department.
-                </p>
-
-                <div className="flex items-center justify-center gap-4 pt-4">
-                  <Link
-                    href="/ambassadors#ambassador-form"
-                    className="group inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full text-sm font-black text-white bg-gradient-to-r from-[#F97316] to-[#EA580C] hover:from-[#EA580C] hover:to-[#C2410C] cye-glow-orange transition-all duration-300 shadow-md cursor-pointer"
-                  >
-                    <span>Apply Now</span>
-                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                  </Link>
-
-                  <Link
-                    href="/ambassadors"
-                    className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full text-sm font-bold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 transition-all shadow-2xs cursor-pointer"
-                  >
-                    <span>Program Details</span>
-                    <Plus className="w-4 h-4 text-slate-500" />
-                  </Link>
-                </div>
-              </motion.div>
-
-              {/* Right Vector Art (Moves from Top-Right into place on scroll) */}
-              <motion.div
-                initial={{ opacity: 0, x: 90, y: -70, scale: 0.92 }}
-                whileInView={{ opacity: 1, x: 0, y: 0, scale: 1 }}
-                viewport={{ once: false, amount: 0.5 }}
-                transition={{ duration: 1.25, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-                className="hidden lg:flex lg:col-span-3 justify-center items-center will-change-transform"
-              >
-                <div className="relative w-48 h-48 xl:w-56 xl:h-56">
-                  <Image
-                    src="/images/ChatGPT Image Aug 18, 2026, 03_38_03 AM 1.png"
-                    alt="Ambassador Illustration Right"
-                    fill
-                    className="object-contain scale-x-[-1]"
-                    priority
-                  />
-                </div>
-              </motion.div>
-            </div>
-          </div>
-        </section>
-
-        {/* 6. BENEFITS & PERKS */}
-        <section id="ambassador-benefits" className="py-16 bg-slate-50">
-          <div className="w-full px-4 sm:px-8 lg:px-12 xl:px-16">
-            <div className="max-w-5xl mx-auto space-y-12">
-              <div className="flex items-center justify-center gap-4 text-center">
-                <span className="w-12 sm:w-16 h-[2px] bg-[#F26522] rounded-full" />
-                <h2 className="text-xs sm:text-sm font-black text-slate-800 uppercase tracking-[0.2em]">
-                  AMBASSADOR PERKS & RECOGNITION
-                </h2>
-                <span className="w-12 sm:w-16 h-[2px] bg-[#F26522] rounded-full" />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-                <div className="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-xs hover:shadow-xl transition-all duration-300 text-center space-y-4 flex flex-col items-center">
-                  <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-xs">
-                    <Award className="w-8 h-8 stroke-[2]" />
-                  </div>
-                  <h3 className="text-base font-black text-[#167C38] tracking-wider uppercase">
-                    OFFICIAL RECOGNITION
-                  </h3>
-                  <p className="text-xs sm:text-sm text-slate-500 font-medium leading-relaxed">
-                    Official leadership certificates awarded by BUIC administration & social media spotlights.
-                  </p>
-                </div>
-
-                <div className="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-xs hover:shadow-xl transition-all duration-300 text-center space-y-4 flex flex-col items-center">
-                  <div className="w-16 h-16 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center shadow-xs">
-                    <Trophy className="w-8 h-8 stroke-[2]" />
-                  </div>
-                  <h3 className="text-base font-black text-[#F26522] tracking-wider uppercase">
-                    PRIZES & SHIELDS
-                  </h3>
-                  <p className="text-xs sm:text-sm text-slate-500 font-medium leading-relaxed">
-                    Exclusive appreciation shields, official merchandise, and special performance awards.
-                  </p>
-                </div>
-
-                <div className="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-xs hover:shadow-xl transition-all duration-300 text-center space-y-4 flex flex-col items-center">
-                  <div className="w-16 h-16 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shadow-xs">
-                    <Users className="w-8 h-8 stroke-[2]" />
-                  </div>
-                  <h3 className="text-base font-black text-[#003B96] tracking-wider uppercase">
-                    NETWORKING & MENTORSHIP
-                  </h3>
-                  <p className="text-xs sm:text-sm text-slate-500 font-medium leading-relaxed">
-                    VIP backstage access and direct engagement with keynote speakers, tech founders, and judges.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
       </main>
 
       {/* Footer */}
       <Footer />
 
-      {/* Registration Modal */}
+      {/* Dynamic Registration Modal */}
       <RegisterModal
         isOpen={registerOpen}
         onClose={() => setRegisterOpen(false)}
@@ -481,4 +328,3 @@ export default function Home() {
     </div>
   );
 }
-

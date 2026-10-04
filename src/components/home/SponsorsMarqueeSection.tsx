@@ -1,5 +1,8 @@
 "use client";
 
+import { useEffect, useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Sparkles, Trophy, Users, ArrowUpRight } from "lucide-react";
 
 interface SponsorsMarqueeProps {
@@ -41,8 +44,64 @@ export default function SponsorsMarqueeSection({
   sponsors = DEFAULT_SPONSORS,
   ambassadors = DEFAULT_AMBASSADORS,
 }: SponsorsMarqueeProps) {
+  const sectionRef = useRef<HTMLElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const marqueeRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    gsap.registerPlugin(ScrollTrigger);
+
+    const section = sectionRef.current;
+    if (!section) return;
+
+    const ctx = gsap.context(() => {
+      // Descend header elements
+      if (headerRef.current) {
+        gsap.fromTo(
+          headerRef.current.children,
+          { y: -35, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            stagger: 0.12,
+            duration: 0.85,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: section,
+              start: "top 85%",
+              toggleActions: "play none none reverse",
+            },
+          }
+        );
+      }
+
+      // Descend marquee lines container
+      if (marqueeRef.current) {
+        gsap.fromTo(
+          marqueeRef.current,
+          { y: -30, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.9,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: marqueeRef.current,
+              start: "top 90%",
+              toggleActions: "play none none reverse",
+            },
+          }
+        );
+      }
+    }, section);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
     <section
+      ref={sectionRef}
       id="sponsors-marquee"
       className="relative py-20 sm:py-28 bg-white text-slate-900 overflow-hidden border-y border-slate-200/80 select-none group-marquee"
     >
@@ -56,7 +115,10 @@ export default function SponsorsMarqueeSection({
       <div className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#167C38]/30 via-[#003B96]/30 via-[#F26522]/30 to-transparent" />
 
       {/* Header Tag */}
-      <div className="w-full px-4 sm:px-8 max-w-7xl mx-auto mb-8 sm:mb-12 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative z-10">
+      <div
+        ref={headerRef}
+        className="w-full px-4 sm:px-8 max-w-7xl mx-auto mb-8 sm:mb-12 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative z-10"
+      >
         <div className="space-y-2">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-orange-50 text-xs font-black uppercase tracking-widest text-[#F26522] border border-orange-200/80 shadow-xs">
             <Trophy className="w-3.5 h-3.5 text-[#F26522]" />
@@ -74,7 +136,7 @@ export default function SponsorsMarqueeSection({
       </div>
 
       {/* 4 Multi-Directional Pure CSS Marquee Lines (Non-stop motion, individual word highlight) */}
-      <div className="space-y-4 sm:space-y-6 overflow-hidden py-2 relative">
+      <div ref={marqueeRef} className="space-y-4 sm:space-y-6 overflow-hidden py-2 relative will-change-transform">
         
         {/* LINE 1 (ODD - Moving Left): Repeat Word "SPONSORS" */}
         <div className="overflow-hidden whitespace-nowrap flex flex-nowrap py-1">

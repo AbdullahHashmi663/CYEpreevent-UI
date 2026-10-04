@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
+import localFont from "next/font/local";
 import {
-  Manrope,
   Bricolage_Grotesque,
   JetBrains_Mono,
   Instrument_Serif,
@@ -11,11 +11,13 @@ import BlindCurtainsTransition from "@/components/layout/BlindCurtainsTransition
 import InitialPageLoader from "@/components/layout/InitialPageLoader";
 import ScrollToTopButton from "@/components/layout/ScrollToTopButton";
 
-// Primary Body Font: Manrope (400, 500, 600, 700, 800)
-const fontManrope = Manrope({
-  subsets: ["latin"],
+// Downloaded Local Font: Manrope (Variable Weights 200-900)
+const fontManrope = localFont({
+  src: "../fonts/Manrope-Variable.ttf",
   variable: "--font-sans",
-  weight: ["400", "500", "600", "700", "800"],
+  weight: "200 900",
+  style: "normal",
+  display: "swap",
 });
 
 // Primary Display / Heading Font: Bricolage Grotesque (600, 700, 800)

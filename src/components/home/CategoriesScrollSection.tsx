@@ -135,9 +135,19 @@ export default function CategoriesScrollSection() {
   const activeIndexRef = useRef<number>(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const cachedOffsetsRef = useRef<{ top: number; height: number }[]>([]);
   const isScheduledRef = useRef<boolean>(false);
 
   useEffect(() => {
+    const updateCachedOffsets = () => {
+      cachedOffsetsRef.current = itemRefs.current.map((el) => {
+        if (!el) return { top: 0, height: 0 };
+        return { top: el.offsetTop, height: el.offsetHeight };
+      });
+    };
+
+    updateCachedOffsets();
+
     const checkActiveItem = () => {
       isScheduledRef.current = false;
       const container = containerRef.current;
@@ -151,15 +161,15 @@ export default function CategoriesScrollSection() {
         return;
       }
 
-      const viewportCenter = windowHeight / 2;
+      const relativeViewportCenter = windowHeight / 2 - containerRect.top;
       let closestIdx = activeIndexRef.current;
       let minDistance = Infinity;
 
-      itemRefs.current.forEach((el, index) => {
-        if (!el) return;
-        const rect = el.getBoundingClientRect();
-        const itemCenter = rect.top + rect.height / 2;
-        const distance = Math.abs(viewportCenter - itemCenter);
+      // Pure math using cached offsets (0 layout thrashing during scroll)
+      cachedOffsetsRef.current.forEach((cached, index) => {
+        if (cached.height === 0) return;
+        const itemCenter = cached.top + cached.height / 2;
+        const distance = Math.abs(relativeViewportCenter - itemCenter);
 
         if (distance < minDistance) {
           minDistance = distance;
@@ -182,15 +192,20 @@ export default function CategoriesScrollSection() {
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", updateCachedOffsets, { passive: true });
     checkActiveItem();
 
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", updateCachedOffsets);
+    };
   }, []);
 
   const activeCategory = CATEGORIES_DATA[activeIndex] || CATEGORIES_DATA[0];
 
   return (
     <section
+      id="categories"
       ref={containerRef}
       className="relative bg-gradient-to-br from-[#002257] via-[#083a22] to-[#021329] text-white py-24 sm:py-32 overflow-hidden border-y border-white/15 select-none"
     >

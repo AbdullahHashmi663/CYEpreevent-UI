@@ -231,6 +231,10 @@ export default function Footer() {
               Ambassadors
             </Link>
             <span className="text-white/20">•</span>
+            <Link href="/conferences" className="hover:text-white transition-colors">
+              Conferences
+            </Link>
+            <span className="text-white/20">•</span>
             <Link href="/team-about" className="hover:text-white transition-colors">
               Team & Leadership
             </Link>

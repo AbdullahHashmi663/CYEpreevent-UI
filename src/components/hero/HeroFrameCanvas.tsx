@@ -17,6 +17,24 @@ function getFrameUrl(index: number): string {
   return `/images/hero-frames/frame-${frameNumber}.webp`;
 }
 
+// Low-frequency keyframe indices across the full 0-259 range for instantaneous scrub availability (~470 KB)
+const KEYFRAME_STRIDE = 16;
+const KEYFRAME_INDICES: number[] = [];
+for (let i = 0; i < TOTAL_FRAMES; i += KEYFRAME_STRIDE) {
+  KEYFRAME_INDICES.push(i);
+}
+if (KEYFRAME_INDICES[KEYFRAME_INDICES.length - 1] !== TOTAL_FRAMES - 1) {
+  KEYFRAME_INDICES.push(TOTAL_FRAMES - 1);
+}
+
+// Medium-frequency indices (stride 4)
+const MIDFRAME_INDICES: number[] = [];
+for (let i = 0; i < TOTAL_FRAMES; i += 4) {
+  if (!KEYFRAME_INDICES.includes(i)) {
+    MIDFRAME_INDICES.push(i);
+  }
+}
+
 export default function HeroFrameCanvas({
   scrollProgress,
   onLoadingProgress,
@@ -26,10 +44,13 @@ export default function HeroFrameCanvas({
 }: HeroFrameCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imagesRef = useRef<(HTMLImageElement | null)[]>(new Array(TOTAL_FRAMES).fill(null));
+  const loadingStatusRef = useRef<boolean[]>(new Array(TOTAL_FRAMES).fill(false));
   const currentFrameRef = useRef<number>(0);
   const targetFrameRef = useRef<number>(0);
   const lastRenderedIdxRef = useRef<number>(-1);
   const rafIdRef = useRef<number | null>(null);
+  const isLoopRunningRef = useRef<boolean>(false);
+
   const [firstFrameLoaded, setFirstFrameLoaded] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const [isMobileScreen, setIsMobileScreen] = useState(false);
@@ -60,7 +81,7 @@ export default function HeroFrameCanvas({
 
   const effectiveIsMobile = isMobileProp ?? isMobileScreen;
 
-  // High-performance canvas frame drawer
+  // Ultra-fast canvas frame drawer with nearest loaded frame fallback
   const drawFrame = useCallback((frameFloat: number, forceRedraw = false) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -70,15 +91,14 @@ export default function HeroFrameCanvas({
 
     const frameIdx = Math.max(0, Math.min(TOTAL_FRAMES - 1, Math.round(frameFloat)));
 
-    // Skip redundant drawing if the frame hasn't changed unless forced (e.g. on resize)
     if (!forceRedraw && frameIdx === lastRenderedIdxRef.current) {
       return;
     }
 
     let img = imagesRef.current[frameIdx];
-    // Fallback to closest loaded frame or frame 0 if current frame is still loading
+
+    // Intelligent nearest-neighbor keyframe fallback if target frame hasn't completed loading yet
     if (!img || !img.complete || img.naturalWidth === 0) {
-      // Find nearest loaded frame
       let nearestImg: HTMLImageElement | null = null;
       for (let offset = 1; offset < TOTAL_FRAMES; offset++) {
         const left = frameIdx - offset;
@@ -94,6 +114,7 @@ export default function HeroFrameCanvas({
       }
       img = nearestImg || imagesRef.current[0];
     }
+
     if (!img || !img.complete || img.naturalWidth === 0) return;
 
     const canvasWidth = canvas.width;
@@ -117,18 +138,19 @@ export default function HeroFrameCanvas({
     }
 
     ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = "high";
+    ctx.imageSmoothingQuality = "medium";
     ctx.drawImage(img, offsetX, offsetY, renderWidth, renderHeight);
 
     lastRenderedIdxRef.current = frameIdx;
   }, []);
 
-  // Resize canvas to match display size with optimal Device Pixel Ratio
+  // Responsive canvas sizing capped to native 1280x720 aspect to save VRAM memory
   const handleResize = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const dpr = Math.min(typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1, 1.5);
+    // Cap DPR at 1.25x (source frames are 720p; avoids wasteful 4K texture allocation)
+    const dpr = Math.min(typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1, 1.25);
     const rect = canvas.getBoundingClientRect();
 
     const displayWidth = Math.round(rect.width * dpr);
@@ -141,12 +163,49 @@ export default function HeroFrameCanvas({
     }
   }, [drawFrame]);
 
-  // Load Frame 1 immediately for instant paint.
-  // On mobile: stop here and do NOT load the other 259 frames to avoid lag & cellular data waste.
-  // On desktop: progressively batch-preload all remaining frames.
+  // Load a single frame with off-main-thread image decoding (img.decode())
+  const loadSingleFrame = useCallback((index: number): Promise<HTMLImageElement | null> => {
+    if (imagesRef.current[index]) {
+      return Promise.resolve(imagesRef.current[index]);
+    }
+    if (loadingStatusRef.current[index]) {
+      return Promise.resolve(null);
+    }
+
+    loadingStatusRef.current[index] = true;
+
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.src = getFrameUrl(index);
+
+      if (typeof img.decode === "function") {
+        img
+          .decode()
+          .then(() => {
+            imagesRef.current[index] = img;
+            resolve(img);
+          })
+          .catch(() => {
+            // Fallback for decode errors or aborted loads
+            imagesRef.current[index] = img;
+            resolve(img);
+          });
+      } else {
+        img.onload = () => {
+          imagesRef.current[index] = img;
+          resolve(img);
+        };
+        img.onerror = () => {
+          resolve(null);
+        };
+      }
+    });
+  }, []);
+
+  // Multi-Pass Keyframe Preload Orchestrator
   useEffect(() => {
     let isCancelled = false;
-    let loadedCount = 0;
+    let totalLoaded = 0;
 
     const notifyProgress = (percent: number) => {
       if (onLoadingProgress) {
@@ -161,89 +220,110 @@ export default function HeroFrameCanvas({
       }
     };
 
-    // 1. First priority: load Frame 1 immediately
-    const firstImg = new Image();
-    firstImg.src = getFrameUrl(0);
-    firstImg.onload = () => {
-      if (isCancelled) return;
-      imagesRef.current[0] = firstImg;
-      loadedCount += 1;
+    // ================= PASS 1: Frame 0 Instant Paint (< 100ms) =================
+    loadSingleFrame(0).then((firstImg) => {
+      if (isCancelled || !firstImg) return;
       setFirstFrameLoaded(true);
       handleResize();
       drawFrame(0, true);
 
-      // On mobile screens: instant completion with single high-res poster frame
+      // On mobile devices: unlock immediately with the high-res poster frame to avoid mobile data & battery drain
       if (effectiveIsMobile) {
         notifyProgress(100);
         if (onLoaded) onLoaded();
         return;
       }
 
-      notifyProgress(Math.floor((loadedCount / TOTAL_FRAMES) * 100));
+      totalLoaded += 1;
+      notifyProgress(10); // Signals loader that initial visual is ready
 
-      // 2. Start progressive batch loading for remaining 259 frames on desktop
-      loadRemainingFrames();
-    };
+      // ================= PASS 2: 16 Keyframes (~470 KB) =================
+      // Once these 16 frames load, scroll scrubbing is fully functional across the runway!
+      const keyframePromises = KEYFRAME_INDICES.filter((idx) => idx !== 0).map((idx) =>
+        loadSingleFrame(idx).then((img) => {
+          if (img) totalLoaded += 1;
+        })
+      );
 
-    firstImg.onerror = () => {
-      if (!isCancelled) {
-        firstImg.src = getFrameUrl(0);
-      }
-    };
+      Promise.all(keyframePromises).then(() => {
+        if (isCancelled || effectiveIsMobile) return;
 
-    const loadRemainingFrames = () => {
-      if (effectiveIsMobile) return;
-      const BATCH_SIZE = 15;
-      let currentIndex = 1;
+        // Keyframes ready: notify 60% progress
+        notifyProgress(60);
 
-      const loadNextBatch = () => {
-        if (isCancelled || effectiveIsMobile || currentIndex >= TOTAL_FRAMES) return;
+        // ================= PASS 3: Mid-frequency In-Betweens (Stride 4) =================
+        const midPromises = MIDFRAME_INDICES.map((idx) =>
+          loadSingleFrame(idx).then((img) => {
+            if (img) totalLoaded += 1;
+          })
+        );
 
-        const end = Math.min(currentIndex + BATCH_SIZE, TOTAL_FRAMES);
-        for (let i = currentIndex; i < end; i++) {
-          const img = new Image();
-          img.src = getFrameUrl(i);
-          img.onload = () => {
-            if (isCancelled) return;
-            imagesRef.current[i] = img;
-            loadedCount += 1;
+        Promise.all(midPromises).then(() => {
+          if (isCancelled || effectiveIsMobile) return;
 
-            const percent = Math.floor((loadedCount / TOTAL_FRAMES) * 100);
-            notifyProgress(percent);
+          notifyProgress(95);
 
-            if (loadedCount >= TOTAL_FRAMES) {
-              if (onLoaded) onLoaded();
+          // ================= PASS 4: Idle Background Filling of All Remaining Details =================
+          const remainingIndices: number[] = [];
+          for (let i = 0; i < TOTAL_FRAMES; i++) {
+            if (!imagesRef.current[i]) {
+              remainingIndices.push(i);
             }
-          };
-          img.onerror = () => {
-            if (isCancelled) return;
-            loadedCount += 1;
-          };
-        }
-
-        currentIndex = end;
-        if (currentIndex < TOTAL_FRAMES && !effectiveIsMobile) {
-          if (typeof window !== "undefined" && "requestIdleCallback" in window) {
-            (window as unknown as { requestIdleCallback: (cb: () => void) => void }).requestIdleCallback(loadNextBatch);
-          } else {
-            setTimeout(loadNextBatch, 15);
           }
-        }
-      };
 
-      loadNextBatch();
-    };
+          let remIdx = 0;
+          const BATCH_SIZE = 8;
+
+          const loadRemainingBatch = () => {
+            if (isCancelled || effectiveIsMobile || remIdx >= remainingIndices.length) {
+              notifyProgress(100);
+              if (onLoaded) onLoaded();
+              return;
+            }
+
+            const batch = remainingIndices.slice(remIdx, remIdx + BATCH_SIZE);
+            remIdx += BATCH_SIZE;
+
+            Promise.all(batch.map((i) => loadSingleFrame(i))).then(() => {
+              if (isCancelled || effectiveIsMobile) return;
+              if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+                (window as unknown as { requestIdleCallback: (cb: () => void) => void }).requestIdleCallback(
+                  loadRemainingBatch
+                );
+              } else {
+                setTimeout(loadRemainingBatch, 25);
+              }
+            });
+          };
+
+          loadRemainingBatch();
+        });
+      });
+    });
 
     window.addEventListener("resize", handleResize);
 
     return () => {
       isCancelled = true;
       window.removeEventListener("resize", handleResize);
-      if (rafIdRef.current) {
-        cancelAnimationFrame(rafIdRef.current);
-      }
     };
-  }, [handleResize, drawFrame, onLoadingProgress, onLoaded, effectiveIsMobile]);
+  }, [handleResize, drawFrame, loadSingleFrame, onLoadingProgress, onLoaded, effectiveIsMobile]);
+
+  // Priority queue: whenever the user scrolls to a frame, ensure adjacent frames load immediately
+  useEffect(() => {
+    if (effectiveIsMobile || prefersReducedMotion) return;
+
+    const currentTarget = targetFrameRef.current;
+    const centerIdx = Math.round(currentTarget);
+
+    // Prioritize loading frames within +/- 3 of current target frame
+    for (let offset = -3; offset <= 3; offset++) {
+      const idx = centerIdx + offset;
+      if (idx >= 0 && idx < TOTAL_FRAMES && !imagesRef.current[idx]) {
+        loadSingleFrame(idx);
+      }
+    }
+  }, [scrollProgress, effectiveIsMobile, prefersReducedMotion, loadSingleFrame]);
 
   // Update target frame based on scroll progress (desktop only)
   useEffect(() => {
@@ -256,50 +336,63 @@ export default function HeroFrameCanvas({
 
     const clampedProgress = Math.max(0, Math.min(1, scrollProgress));
     targetFrameRef.current = clampedProgress * (TOTAL_FRAMES - 1);
+
+    // Trigger on-demand render loop if not already running
+    if (!isLoopRunningRef.current) {
+      startRenderLoop();
+    }
   }, [scrollProgress, prefersReducedMotion, effectiveIsMobile, drawFrame]);
 
-  // RAF loop for buttery-smooth lerped frame rendering (desktop only)
-  useEffect(() => {
-    if (prefersReducedMotion || effectiveIsMobile) return;
+  // Smart On-Demand RAF loop (stops when settled - ZERO CPU consumption when idle!)
+  const startRenderLoop = useCallback(() => {
+    if (isLoopRunningRef.current || prefersReducedMotion || effectiveIsMobile) return;
+    isLoopRunningRef.current = true;
 
-    let isRunning = true;
-
-    const renderLoop = () => {
-      if (!isRunning) return;
-
+    const renderTick = () => {
       const target = targetFrameRef.current;
       const current = currentFrameRef.current;
       const diff = target - current;
 
-      // Snappy and smooth lerp dampening across 260 frames
-      if (Math.abs(diff) > 0.001) {
-        currentFrameRef.current += diff * 0.35;
+      // Snappy and smooth lerp dampening
+      if (Math.abs(diff) > 0.002) {
+        currentFrameRef.current += diff * 0.38;
         drawFrame(currentFrameRef.current);
+        rafIdRef.current = requestAnimationFrame(renderTick);
+      } else {
+        // Snapped to final target frame: draw final crisp frame and shut down the loop
+        currentFrameRef.current = target;
+        drawFrame(target);
+        isLoopRunningRef.current = false;
+        if (rafIdRef.current) {
+          cancelAnimationFrame(rafIdRef.current);
+          rafIdRef.current = null;
+        }
       }
-
-      rafIdRef.current = requestAnimationFrame(renderLoop);
     };
 
-    rafIdRef.current = requestAnimationFrame(renderLoop);
+    rafIdRef.current = requestAnimationFrame(renderTick);
+  }, [drawFrame, prefersReducedMotion, effectiveIsMobile]);
 
+  // Clean up RAF on unmount
+  useEffect(() => {
     return () => {
-      isRunning = false;
+      isLoopRunningRef.current = false;
       if (rafIdRef.current) {
         cancelAnimationFrame(rafIdRef.current);
       }
     };
-  }, [drawFrame, prefersReducedMotion, effectiveIsMobile]);
+  }, []);
 
   return (
     <div className={`relative w-full h-full select-none overflow-hidden ${className}`}>
-      {/* High-Performance Interactive HTML5 Canvas with Sharpness & Contrast Enhancement */}
+      {/* High-Performance Canvas */}
       <canvas
         ref={canvasRef}
         className="w-full h-full object-cover block pointer-events-none will-change-transform"
         style={{
           opacity: firstFrameLoaded ? 1 : 0,
-          filter: "contrast(1.05) saturate(1.08) brightness(1.02)",
-          transition: "opacity 0.35s ease-out",
+          filter: "contrast(1.04) saturate(1.06) brightness(1.02)",
+          transition: "opacity 0.25s ease-out",
         }}
         aria-hidden="true"
       />
@@ -307,25 +400,15 @@ export default function HeroFrameCanvas({
       {/* Cinematic Ambient Lighting Glow Overlay */}
       <div className="absolute inset-0 bg-radial from-white/10 via-transparent to-black/20 pointer-events-none" />
 
-      {/* Fallback Static Image for SSR / Instant First-Paint / No-JS */}
+      {/* Instant Fallback Poster for SSR / First-Paint */}
       {!firstFrameLoaded && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src="/images/hero-frames/frame-001.jpg"
-          alt="Capital Youth Expo 3D Assembled Monument"
-          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-        />
-      )}
-
-      {/* NoScript Fallback for JavaScript-disabled environments */}
-      <noscript>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/images/hero-frames/frame-001.jpg"
+          src="/images/hero-frames/frame-001.webp"
           alt="Capital Youth Expo Monument"
           className="absolute inset-0 w-full h-full object-cover pointer-events-none"
         />
-      </noscript>
+      )}
     </div>
   );
 }

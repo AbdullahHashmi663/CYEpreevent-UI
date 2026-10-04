@@ -13,6 +13,39 @@
   --cye-dark: #0F172A;
 }
 
+@font-face {
+  font-family: 'Manrope';
+  src: url('/fonts/Manrope-Variable.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Neue Machina';
+  src: url('/fonts/NeueMachina-Ultrabold.woff') format('woff');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Neue Machina';
+  src: url('/fonts/NeueMachina-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+.font-manrope {
+  font-family: 'Manrope', var(--font-sans), sans-serif;
+}
+
+.font-machina,
+.font-neue-machina {
+  font-family: 'Neue Machina', var(--font-sans), sans-serif;
+}
+
 .font-display {
   font-family: var(--font-display), 'Bricolage Grotesque', system-ui, sans-serif;
 }
@@ -98,6 +131,57 @@
 
 .cye-glow-green {
   box-shadow: 0 10px 25px -5px rgba(22, 124, 56, 0.35);
+}
+
+/* Geometric Cube Conic Pattern with Glowing Neon Lighting Lines */
+.geometric-cube-pattern {
+  --s: 37px; /* control the size */
+  --line-color: rgba(255, 255, 255, 0.28);
+  --bg-base: #12141a;
+  --c: #0000, var(--line-color) 0.5deg 119.5deg, #0000 120deg;
+  --g1: conic-gradient(from 60deg at 56.25% calc(425% / 6), var(--c));
+  --g2: conic-gradient(from 180deg at 43.75% calc(425% / 6), var(--c));
+  --g3: conic-gradient(from -60deg at 50% calc(175% / 12), var(--c));
+  background: var(--g1), var(--g1) var(--s) calc(1.73 * var(--s)), var(--g2),
+    var(--g2) var(--s) calc(1.73 * var(--s)), var(--g3) var(--s) 0,
+    var(--g3) 0 calc(1.73 * var(--s)) var(--bg-base);
+  background-size: calc(2 * var(--s)) calc(3.46 * var(--s));
+}
+
+/* Gold / Amber Neon Lighting Lines for Event Head */
+.geometric-lighting-gold {
+  --line-color: rgba(251, 191, 36, 0.55);
+  --bg-base: #0c0e14;
+  filter: drop-shadow(0 0 14px rgba(245, 158, 11, 0.25));
+}
+
+/* Emerald / Mint Neon Lighting Lines for Deputy Head 1 */
+.geometric-lighting-emerald {
+  --line-color: rgba(52, 211, 153, 0.55);
+  --bg-base: #060e0a;
+  filter: drop-shadow(0 0 14px rgba(16, 185, 129, 0.25));
+}
+
+/* Warm Sunset Orange Lighting Lines for Deputy Head 2 */
+.geometric-lighting-orange {
+  --line-color: rgba(251, 146, 60, 0.55);
+  --bg-base: #0e0704;
+  filter: drop-shadow(0 0 14px rgba(242, 101, 34, 0.25));
+}
+
+@keyframes neon-ambient-pulse {
+  0%, 100% {
+    opacity: 0.75;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+}
+
+.animate-neon-pulse {
+  animation: neon-ambient-pulse 4s ease-in-out infinite;
 }
 
 /* Ultra-Thin Minimalist Scrollbar */
@@ -227,3 +311,61 @@ html {
   width: max-content;
   animation: marquee-right 32s linear infinite;
 }
+
+/* Offscreen Paint Containment & Auto Content Visibility */
+.section-auto-contain {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 650px;
+}
+
+/* ================= AWWWARDS TIER DESIGN TOKENS & UTILITIES ================= */
+
+/* Elevated Cyber Frosted Glass Panel */
+.glass-panel-cyber {
+  background: rgba(10, 15, 29, 0.72);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.glass-panel-cyber:hover {
+  border-color: rgba(255, 255, 255, 0.28);
+  box-shadow: 0 30px 60px -15px rgba(0, 59, 150, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+/* Animated Light Sheen */
+@keyframes border-shimmer {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-border-shimmer {
+  background-size: 200% 200%;
+  animation: border-shimmer 6s ease infinite;
+}
+
+/* Ambient Radial Gradients */
+.radial-blur-orb-blue {
+  background: radial-gradient(circle, rgba(0, 59, 150, 0.35) 0%, rgba(0, 59, 150, 0) 70%);
+}
+
+.radial-blur-orb-emerald {
+  background: radial-gradient(circle, rgba(22, 124, 56, 0.35) 0%, rgba(22, 124, 56, 0) 70%);
+}
+
+.radial-blur-orb-orange {
+  background: radial-gradient(circle, rgba(242, 101, 34, 0.35) 0%, rgba(242, 101, 34, 0) 70%);
+}
+
+/* 3D Card Hover Depth */
+.tilt-card-3d {
+  transform-style: preserve-3d;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tilt-card-3d:hover {
+  transform: translateY(-8px) scale(1.015);
+}
+

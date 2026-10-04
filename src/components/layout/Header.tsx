@@ -26,7 +26,7 @@ const NAV_ITEMS = [
   { name: "Home", href: "/", icon: Compass },
   { name: "Competitions", href: "/competitions", icon: Trophy },
   { name: "Ambassadors", href: "/ambassadors", icon: Users },
-  { name: "Conferences", href: "/#conferences", icon: Sparkles },
+  { name: "Conferences", href: "/conferences", icon: Sparkles },
   { name: "Team & About", href: "/team-about", icon: Info },
   { name: "Venue", href: "/venue", icon: MapPin },
   { name: "Contact", href: "/contact", icon: Phone },

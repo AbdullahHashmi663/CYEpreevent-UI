@@ -47,22 +47,19 @@ export default function InitialPageLoader() {
     const interval = setInterval(() => {
       const realFrameP = realFrameProgressRef.current;
 
-      // Advance progress based on real frame-loading progress + time progression
+      // Smooth progression tied to keyframe availability
       if (currentProgress < realFrameP) {
-        currentProgress = Math.min(realFrameP, currentProgress + 4);
-      } else if (currentProgress < 30) {
-        currentProgress += Math.floor(Math.random() * 5) + 2;
-      } else if (currentProgress < 70) {
-        currentProgress += Math.floor(Math.random() * 4) + 2;
-      } else if (currentProgress < 95) {
-        if (realFrameP >= 95 || windowLoaded) {
-          currentProgress += 3;
-        } else {
-          currentProgress = Math.min(95, currentProgress + 0.8);
-        }
+        currentProgress = Math.min(realFrameP, currentProgress + 6);
+      } else if (currentProgress < 50) {
+        currentProgress += Math.floor(Math.random() * 6) + 4;
+      } else if (currentProgress < 90) {
+        currentProgress += Math.floor(Math.random() * 5) + 3;
       } else {
-        if (realFrameP >= 99 || windowLoaded) {
+        // As soon as keyframes are ready (realFrameP >= 60) or window loaded, smoothly complete to 100%
+        if (realFrameP >= 60 || windowLoaded) {
           currentProgress = 100;
+        } else {
+          currentProgress = Math.min(99, currentProgress + 2);
         }
       }
 
