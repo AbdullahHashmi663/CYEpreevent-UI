@@ -1,325 +1,154 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
-import { motion, useScroll, useSpring, useTransform, useMotionValueEvent } from "framer-motion";
-import { ArrowRight, Sparkles, Trophy } from "lucide-react";
+import Image from "next/image";
+import { ArrowRight, Sparkles, Trophy, ChevronRight } from "lucide-react";
 import DateVenueBadge from "./DateVenueBadge";
 import PresentedByBanner from "./PresentedByBanner";
-import HeroFrameCanvas from "./HeroFrameCanvas";
 
 interface HeroSectionProps {
   onExploreClick?: () => void;
   onRegisterClick?: () => void;
-  onLoadingProgress?: (progress: number) => void;
 }
 
-export default function HeroSection({
-  onExploreClick,
-  onRegisterClick,
-  onLoadingProgress,
-}: HeroSectionProps) {
-  const containerRef = useRef<HTMLElement>(null);
-  const [currentScrollProgress, setCurrentScrollProgress] = useState(0);
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-
-  // Check prefers-reduced-motion & screen size
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-      setPrefersReducedMotion(mediaQuery.matches);
-
-      const checkScreen = () => {
-        setIsMobile(window.innerWidth < 768);
-      };
-      checkScreen();
-
-      const handleChange = (e: MediaQueryListEvent) => {
-        setPrefersReducedMotion(e.matches);
-      };
-
-      mediaQuery.addEventListener("change", handleChange);
-      window.addEventListener("resize", checkScreen);
-      return () => {
-        mediaQuery.removeEventListener("change", handleChange);
-        window.removeEventListener("resize", checkScreen);
-      };
-    }
-  }, []);
-
-  // Track scroll position across the hero runway
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"],
-  });
-
-  const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 120,
-    damping: 30,
-    restDelta: 0.0005,
-  });
-
-  // Sync motion value with canvas scroll progress state
-  useMotionValueEvent(smoothProgress, "change", (latest) => {
-    setCurrentScrollProgress(latest);
-  });
-
-  // Desktop typography gentle parallax and fade towards end of runway
-  const desktopTextY = useTransform(smoothProgress, [0, 0.7, 1], ["0%", "-4%", "-15%"]);
-  const desktopTextOpacity = useTransform(smoothProgress, [0, 0.7, 0.95, 1], [1, 1, 0.6, 0.1]);
-  const desktopTextScale = useTransform(smoothProgress, [0, 0.7, 1], [1, 1.02, 0.98]);
-
-  // Mobile typography dynamic on-scroll pop parallax (100% razor-sharp, zero text blur)
-  const mobileTextY = useTransform(smoothProgress, [0, 0.35, 0.75, 1], ["0%", "-3%", "-10%", "-22%"]);
-  const mobileTextScale = useTransform(smoothProgress, [0, 0.2, 0.6, 1], [1, 1.04, 0.98, 0.9]);
-  const mobileTextOpacity = useTransform(smoothProgress, [0, 0.65, 0.9, 1], [1, 0.95, 0.4, 0]);
-
-  // Mobile background on-scroll blur-up & zoom effect (creates depth behind crisp text)
-  const mobileBgBlur = useTransform(smoothProgress, [0, 0.45, 0.9], ["blur(0px)", "blur(6px)", "blur(14px)"]);
-  const mobileBgScale = useTransform(smoothProgress, [0, 0.5, 1], [1, 1.05, 1.1]);
-  const mobileBgOpacity = useTransform(smoothProgress, [0, 0.7, 1], [1, 0.85, 0.35]);
-
-  // Bottom banner fade out slightly as we scroll down
-  const bannerOpacity = useTransform(smoothProgress, [0, 0.6, 0.9, 1], [1, 0.95, 0.5, 0]);
-  const bannerY = useTransform(smoothProgress, [0, 0.8, 1], ["0%", "5%", "15%"]);
-
-  // Staggered popping entrance animation variants for crisp text
-  const popWordVariants = {
-    hidden: { scale: 0.72, opacity: 0, y: 28 },
-    visible: (custom: number) => ({
-      scale: 1,
-      opacity: 1,
-      y: 0,
-      transition: {
-        type: "spring" as const,
-        stiffness: 380,
-        damping: 18,
-        delay: 0.12 + custom * 0.09,
-      },
-    }),
-  };
-
-  const popBadgeVariants = {
-    hidden: { scale: 0.75, opacity: 0, y: -16 },
-    visible: {
-      scale: 1,
-      opacity: 1,
-      y: 0,
-      transition: {
-        type: "spring" as const,
-        stiffness: 360,
-        damping: 20,
-        delay: 0.08,
-      },
-    },
-  };
-
-  const popItemVariants = {
-    hidden: { scale: 0.82, opacity: 0, y: 24 },
-    visible: (custom: number) => ({
-      scale: 1,
-      opacity: 1,
-      y: 0,
-      transition: {
-        type: "spring" as const,
-        stiffness: 350,
-        damping: 20,
-        delay: 0.45 + custom * 0.1,
-      },
-    }),
-  };
-
+export default function HeroSection({ onExploreClick, onRegisterClick }: HeroSectionProps) {
   return (
-    <section
-      ref={containerRef}
-      className={`relative w-full ${isMobile ? "h-[160vh]" : "h-[220vh] sm:h-[260vh]"} bg-slate-900 select-none`}
-    >
-      {/* Pinned Sticky Viewport Stage */}
-      <div className="sticky top-0 h-screen w-full flex flex-col justify-between overflow-hidden pt-4 sm:pt-8 pb-4 sm:pb-6">
-        
-        {/* Background Stage Canvas & Ambient Lighting (Zero blur on desktop, mobile-only on-scroll blur) */}
-        <motion.div
-          className="absolute inset-0 z-0 pointer-events-none will-change-transform"
-          style={
-            isMobile && !prefersReducedMotion
-              ? {
-                  filter: mobileBgBlur,
-                  scale: mobileBgScale,
-                  opacity: mobileBgOpacity,
-                }
-              : {
-                  filter: "none",
-                }
-          }
-        >
-          {/* Hero Frame Canvas: Plays 260 crisp interactive frames on desktop; static poster on mobile */}
-          <HeroFrameCanvas
-            scrollProgress={prefersReducedMotion ? 0 : currentScrollProgress}
-            onLoadingProgress={onLoadingProgress}
-            isMobile={isMobile}
-            className="w-full h-full"
-          />
+    <section className="relative w-full flex-1 flex flex-col justify-between pt-1 sm:pt-2 pb-1 overflow-hidden">
 
-          {/* Left Gradient Overlay for crisp contrast and readability of hero text */}
-          <div className="absolute inset-0 bg-gradient-to-r from-white/90 via-white/60 to-transparent md:w-1/2 pointer-events-none" />
-
-          {/* Subtle Bottom & Top Vignette Gradients */}
-          <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-white/70 to-transparent pointer-events-none" />
-          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-slate-50 via-slate-50/70 to-transparent pointer-events-none" />
-        </motion.div>
-
-        {/* Main Hero Content Area */}
-        <div className="relative z-10 w-full px-4 sm:px-8 lg:px-12 xl:px-16 pt-2 sm:pt-4">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            
-            {/* Left Hero Headlines & Metadata (100% Crisp - Zero Blur on Desktop & Mobile) */}
-            <motion.div
-              className="lg:col-span-7 xl:col-span-6 space-y-3 sm:space-y-4 text-left will-change-transform"
-              style={
-                prefersReducedMotion
-                  ? { filter: "none" }
-                  : isMobile
-                  ? {
-                      y: mobileTextY,
-                      opacity: mobileTextOpacity,
-                      scale: mobileTextScale,
-                      filter: "none",
-                      transformOrigin: "top left",
-                    }
-                  : {
-                      y: desktopTextY,
-                      opacity: desktopTextOpacity,
-                      scale: desktopTextScale,
-                      filter: "none",
-                      transformOrigin: "top left",
-                    }
-              }
-            >
-              {/* Tag Badge with Pop Entrance */}
-              <motion.div
-                variants={popBadgeVariants}
-                initial="hidden"
-                animate="visible"
-                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-100/90 text-[#003B96] text-xs font-black uppercase tracking-widest border border-blue-200 shadow-xs backdrop-blur-xs active:scale-95 transition-transform"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-[#F26522] animate-pulse" />
-                <span>The Flagship Pre-Event of Islamabad</span>
-              </motion.div>
-
-              {/* Bold Multi-colored Main Title with Staggered Word Popping */}
-              <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-[76px] font-black tracking-tight leading-[0.95] select-none">
-                <motion.span
-                  custom={0}
-                  variants={popWordVariants}
-                  initial="hidden"
-                  animate="visible"
-                  className="block text-[#003B96] drop-shadow-xs origin-left will-change-transform"
-                >
-                  CAPITAL
-                </motion.span>
-                <motion.span
-                  custom={1}
-                  variants={popWordVariants}
-                  initial="hidden"
-                  animate="visible"
-                  className="block text-[#167C38] drop-shadow-xs origin-left will-change-transform"
-                >
-                  YOUTH EXPO
-                </motion.span>
-                <motion.span
-                  custom={2}
-                  variants={popWordVariants}
-                  initial="hidden"
-                  animate="visible"
-                  className="block text-[#F26522] drop-shadow-xs origin-left will-change-transform"
-                >
-                  PRE EVENT
-                </motion.span>
-                <motion.span
-                  custom={3}
-                  variants={popWordVariants}
-                  initial="hidden"
-                  animate="visible"
-                  className="block text-[#003B96] drop-shadow-xs origin-left will-change-transform"
-                >
-                  AT BUIC
-                </motion.span>
-              </h1>
-
-              {/* Date & Venue Info Badges with Pop Animation */}
-              <motion.div
-                custom={0}
-                variants={popItemVariants}
-                initial="hidden"
-                animate="visible"
-              >
-                <DateVenueBadge />
-              </motion.div>
-
-              {/* Dual CTA Buttons with Pop Animation */}
-              <motion.div
-                custom={1}
-                variants={popItemVariants}
-                initial="hidden"
-                animate="visible"
-                className="flex flex-wrap items-center gap-3 sm:gap-4 pt-1 sm:pt-2"
-              >
-                <button
-                  onClick={onRegisterClick}
-                  className="inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-3 sm:py-3.5 rounded-full text-xs sm:text-sm font-black text-white bg-gradient-to-r from-[#F97316] via-[#EA580C] to-[#C2410C] hover:from-[#EA580C] hover:to-[#9A3412] cye-glow-orange transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg cursor-pointer active:scale-95"
-                >
-                  <Trophy className="w-4 h-4" />
-                  <span>Register for Competitions</span>
-                  <ArrowRight className="w-4 h-4 ml-1" />
-                </button>
-
-                <a
-                  href="#explore"
-                  onClick={(e) => {
-                    if (onExploreClick) {
-                      e.preventDefault();
-                      onExploreClick();
-                    }
-                  }}
-                  className="inline-flex items-center gap-2.5 sm:gap-3 text-slate-800 hover:text-[#003B96] font-bold text-xs sm:text-base group transition-colors cursor-pointer px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-full hover:bg-white/80 backdrop-blur-xs active:scale-95"
-                >
-                  <span>Explore Tracks</span>
-                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-slate-300 bg-white/90 flex items-center justify-center group-hover:border-[#003B96] group-hover:bg-[#003B96] group-hover:text-white transition-all duration-300 shadow-xs">
-                    <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform group-hover:translate-x-1" />
-                  </div>
-                </a>
-              </motion.div>
-            </motion.div>
-
-            {/* Right Spacer for 3D Interactive Model Visual on Desktop */}
-            <div className="hidden lg:block lg:col-span-5 xl:col-span-6 min-h-[220px]" />
-          </div>
+      {/* ==================== CYBER LEFT FLOATING VERTICAL BANNER (BUIC 2026) ==================== */}
+      <div className="absolute left-2 sm:left-3 md:left-4 top-3 sm:top-4 bottom-4 sm:bottom-6 z-20 w-6 sm:w-7 md:w-7.5 bg-gradient-to-b from-[#F26522] via-[#EA580C] to-[#F26522] rounded-full border border-white/20 shadow-[0_6px_20px_rgba(242,101,34,0.35)] flex flex-col justify-between items-center py-4 sm:py-5 select-none pointer-events-none">
+        {/* Top Vertical Text */}
+        <div className="flex flex-col items-center">
+          <span className="[writing-mode:vertical-rl] rotate-180 text-white font-black tracking-[0.25em] text-[9px] sm:text-[10px] md:text-[11px] uppercase drop-shadow-xs">
+            BUIC 2026
+          </span>
         </div>
 
-        {/* Floating Presented By Sub-Hero Banner */}
-        <motion.div
-          className="relative z-20 mt-auto pt-2 will-change-transform"
-          style={
-            prefersReducedMotion
-              ? {}
-              : {
-                  opacity: bannerOpacity,
-                  y: bannerY,
-                }
-          }
-        >
-          <PresentedByBanner />
+        {/* Center Vertical Divider Line */}
+        <div className="w-[1.5px] h-8 sm:h-12 bg-white/40 rounded-full" />
 
-          {/* Explore What Awaits You Section Indicator */}
-          <div className="flex items-center justify-center gap-2.5 sm:gap-3 pt-3 pb-1 text-[10px] sm:text-xs font-black text-slate-600 uppercase tracking-widest select-none">
-            <span className="w-8 sm:w-12 h-[2px] bg-gradient-to-r from-transparent to-[#003B96]" />
-            <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#003B96]" />
-            <span className="text-slate-900 font-extrabold">EXPLORE WHAT AWAITS YOU</span>
-            <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#F26522]" />
-            <span className="w-8 sm:w-12 h-[2px] bg-gradient-to-l from-transparent to-[#F26522]" />
+        {/* Lower Vertical Text & Geometric Accent Bars */}
+        <div className="flex flex-col items-center gap-3 sm:gap-4">
+          <span className="[writing-mode:vertical-rl] rotate-180 text-white font-black tracking-[0.25em] text-[9px] sm:text-[10px] md:text-[11px] uppercase drop-shadow-xs">
+            BUIC 2026
+          </span>
+
+          {/* Geometric Accent Bars at Bottom */}
+          <div className="flex items-end gap-1 h-6 sm:h-8 pt-1">
+            <div className="w-1 sm:w-1.5 h-5 sm:h-6 bg-white/90 rounded-full shadow-xs" />
+            <div className="w-0.5 sm:w-1 h-3 sm:h-4 bg-white/50 rounded-full" />
           </div>
-        </motion.div>
+        </div>
+      </div>
 
+      {/* Main Content Area */}
+      <div className="relative z-10 w-full pl-12 sm:pl-16 md:pl-20 lg:pl-24 xl:pl-28 pr-4 sm:pr-8 lg:pr-12 xl:pr-16 pt-6 sm:pt-8 md:pt-10 pb-2">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+          {/* Left Hero Headlines & Metadata */}
+          <div className="lg:col-span-7 xl:col-span-6 space-y-3.5 sm:space-y-4 text-left">
+            {/* Stylized Flagship Pre-Event Tagline */}
+            <div className="inline-flex items-center gap-1.5 sm:gap-2 select-none pt-0.5">
+              {/* Left Dots + Horizontal Line */}
+              <div className="flex items-center gap-1">
+                <span className="w-1 h-1 rounded-full bg-[#F26522]" />
+                <span className="w-1.5 h-1.5 rounded-full bg-[#F26522]" />
+                <span className="w-6 sm:w-10 h-[2px] bg-[#F26522] rounded-full" />
+              </div>
+
+              {/* Text */}
+              <span className="text-xs sm:text-sm font-black tracking-wider text-[#F26522] uppercase">
+                Flagship Pre-event of Islamabad
+              </span>
+
+              {/* Right Horizontal Line + Dots */}
+              <div className="flex items-center gap-1">
+                <span className="w-6 sm:w-10 h-[2px] bg-[#F26522] rounded-full" />
+                <span className="w-1.5 h-1.5 rounded-full bg-[#F26522]" />
+                <span className="w-1 h-1 rounded-full bg-[#F26522]" />
+              </div>
+            </div>
+
+            {/* Bold Multi-colored Main Title */}
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[66px] xl:text-[74px] font-black tracking-tight leading-[0.95] select-none">
+              <span className="block text-[#003B96] drop-shadow-xs">CAPITAL</span>
+              <span className="block text-[#167C38] drop-shadow-xs">YOUTH EXPO</span>
+              <span className="block text-[#F26522] drop-shadow-xs">PRE EVENT</span>
+              <span className="block text-[#003B96] drop-shadow-xs">AT BUIC</span>
+            </h1>
+
+            {/* Date & Venue Info Badges with Live Countdown */}
+            <DateVenueBadge />
+
+            {/* Dual CTA Buttons */}
+            <div className="flex flex-wrap items-center gap-3 pt-1">
+              {/* Luminous Blue Aurora Button (Register for Competitions) */}
+              <button
+                onClick={onRegisterClick}
+                className="relative group inline-flex items-center justify-center rounded-full transition-all duration-300 transform hover:-translate-y-0.5 cursor-pointer"
+              >
+                {/* Compact Ambient Blue Glow - Only Visible on Hover */}
+                <span className="absolute -inset-0.5 rounded-full bg-gradient-to-r from-[#003B96] via-[#2563EB] to-[#0284C7] opacity-0 group-hover:opacity-80 blur-md transition-opacity duration-300 pointer-events-none" />
+
+                {/* Inner Aurora Blue Canvas */}
+                <span className="relative px-5 sm:px-6 py-2.5 sm:py-3 rounded-full overflow-hidden bg-gradient-to-r from-[#003B96] via-[#1D4ED8] to-[#0284C7] text-white flex items-center gap-2 text-xs sm:text-sm font-black shadow-md border border-blue-400/30">
+                  {/* Shimmer light sweep on hover */}
+                  <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out pointer-events-none" />
+
+                  {/* Top subtle light reflection */}
+                  <span className="absolute top-0 inset-x-3 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none" />
+
+                  {/* Luminous Bottom Inner Rim Glow */}
+                  <span className="absolute bottom-0 inset-x-2 h-[2px] bg-gradient-to-r from-transparent via-cyan-300 to-transparent blur-[0.5px] opacity-80 group-hover:opacity-100 transition-all pointer-events-none" />
+
+                  {/* Button Content */}
+                  <Trophy className="w-3.5 h-3.5 text-amber-300 relative z-10" />
+                  <span className="relative z-10 tracking-tight">Register for Competitions</span>
+                  <ChevronRight className="w-4 h-4 text-white stroke-[3] transition-transform duration-300 group-hover:translate-x-1 relative z-10" />
+                </span>
+              </button>
+
+              {/* Custom Liquid Animated Gradient Border Button (White Body, Thick Liquid Border, Chevron >) */}
+              <a
+                href="#explore"
+                onClick={(e) => {
+                  if (onExploreClick) {
+                    e.preventDefault();
+                    onExploreClick();
+                  }
+                }}
+                className="relative group inline-flex items-center justify-center p-[3.5px] rounded-full overflow-hidden transition-all duration-300 transform hover:-translate-y-0.5 cursor-pointer shadow-md"
+              >
+                {/* Default Subtle Boundary Layer (Image 1) */}
+                <span className="absolute inset-0 rounded-full border border-slate-300 bg-white group-hover:opacity-0 transition-opacity duration-300" />
+
+                {/* Animated Liquid Gradient Rotating Border on Hover (Image 2 - Thick Boundary) */}
+                <span className="absolute -inset-[250%] rounded-full bg-cye-liquid animate-liquid-spin opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-[0.5px]" />
+
+                {/* Inner White Pill Container */}
+                <span className="relative z-10 px-5 sm:px-6 py-2 sm:py-2.5 rounded-full bg-white text-slate-900 font-black text-xs sm:text-sm flex items-center gap-2 transition-colors duration-200">
+                  <span>Explore Tracks</span>
+                  <ChevronRight className="w-4 h-4 text-slate-900 stroke-[3] transition-transform duration-300 group-hover:translate-x-1" />
+                </span>
+              </a>
+            </div>
+          </div>
+
+          {/* Right Spacer for 3D Graphic */}
+          <div className="hidden lg:block lg:col-span-5 xl:col-span-6 min-h-[160px]" />
+        </div>
+      </div>
+
+      {/* Floating Presented By Sub-Hero Banner */}
+      <div className="relative z-20 mt-auto pl-10 sm:pl-16 md:pl-20 lg:pl-24 pr-4 sm:pr-8 pb-1">
+        <PresentedByBanner />
+
+        {/* Explore What Awaits You Section Indicator */}
+        <div className="flex items-center justify-center gap-3 pt-2.5 pb-1 text-[11px] font-black text-slate-600 uppercase tracking-widest select-none">
+          <span className="w-10 h-[2px] bg-gradient-to-r from-transparent to-[#003B96]" />
+          <span className="w-1.5 h-1.5 rounded-full bg-[#003B96]" />
+          <span className="text-slate-900 font-extrabold">EXPLORE WHAT AWAITS YOU</span>
+          <span className="w-1.5 h-1.5 rounded-full bg-[#F26522]" />
+          <span className="w-10 h-[2px] bg-gradient-to-l from-transparent to-[#F26522]" />
+        </div>
       </div>
     </section>
   );

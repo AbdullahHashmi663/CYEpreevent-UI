@@ -35,34 +35,34 @@ export default function DateVenueBadge() {
   }, []);
 
   return (
-    <div className="space-y-3 sm:space-y-4 my-4 sm:my-8 max-w-full">
+    <div className="space-y-3 my-3 sm:my-4">
       {/* Date & Venue Cards */}
-      <div className="flex flex-wrap items-center gap-2.5 sm:gap-4">
+      <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
         {/* Date Card */}
-        <div className="glass-card flex items-center gap-3 sm:gap-3.5 px-3.5 py-2.5 sm:px-5 sm:py-3.5 rounded-2xl shadow-sm hover:shadow-md transition-all border border-slate-200/80 bg-white/95 group w-full sm:w-auto">
-          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#003B96]/10 text-[#003B96] group-hover:bg-[#003B96] group-hover:text-white transition-colors flex items-center justify-center flex-shrink-0">
-            <Calendar className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.2]" />
+        <div className="glass-card flex items-center gap-2.5 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl shadow-2xs hover:shadow-xs transition-all border border-slate-200/80 bg-white/95 group">
+          <div className="w-8 h-8 rounded-lg bg-[#003B96]/10 text-[#003B96] group-hover:bg-[#003B96] group-hover:text-white transition-colors flex items-center justify-center flex-shrink-0">
+            <Calendar className="w-4 h-4 stroke-[2.2]" />
           </div>
-          <div className="flex flex-col min-w-0">
-            <span className="text-xs sm:text-sm font-black text-slate-900 leading-tight">
+          <div className="flex flex-col">
+            <span className="text-xs font-black text-slate-900 leading-tight">
               1st October 2026
             </span>
-            <span className="text-[10px] sm:text-[11px] font-black text-[#167C38] tracking-wider uppercase mt-0.5">
+            <span className="text-[10px] font-black text-[#167C38] tracking-wider uppercase mt-0.5">
               THURSDAY • FULL DAY EXPO
             </span>
           </div>
         </div>
 
         {/* Venue Card */}
-        <div className="glass-card flex items-center gap-3 sm:gap-3.5 px-3.5 py-2.5 sm:px-5 sm:py-3.5 rounded-2xl shadow-sm hover:shadow-md transition-all border border-slate-200/80 bg-white/95 group w-full sm:w-auto">
-          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#F26522]/10 text-[#F26522] group-hover:bg-[#F26522] group-hover:text-white transition-colors flex items-center justify-center flex-shrink-0">
-            <MapPin className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.2]" />
+        <div className="glass-card flex items-center gap-2.5 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl shadow-2xs hover:shadow-xs transition-all border border-slate-200/80 bg-white/95 group">
+          <div className="w-8 h-8 rounded-lg bg-[#F26522]/10 text-[#F26522] group-hover:bg-[#F26522] group-hover:text-white transition-colors flex items-center justify-center flex-shrink-0">
+            <MapPin className="w-4 h-4 stroke-[2.2]" />
           </div>
-          <div className="flex flex-col min-w-0">
-            <span className="text-xs sm:text-sm font-black text-slate-900 leading-tight truncate">
+          <div className="flex flex-col">
+            <span className="text-xs font-black text-slate-900 leading-tight">
               Bahria University (BUIC)
             </span>
-            <span className="text-[10px] sm:text-[11px] font-bold text-slate-500 tracking-tight mt-0.5 truncate">
+            <span className="text-[10px] font-bold text-slate-500 tracking-tight mt-0.5">
               Shangrilla Rd, Sector E-8, Islamabad
             </span>
           </div>
@@ -70,30 +70,30 @@ export default function DateVenueBadge() {
       </div>
 
       {/* Live Event Countdown Ticker */}
-      <div className="inline-flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-2.5 rounded-2xl bg-gradient-to-r from-slate-900 to-[#002257] text-white shadow-lg border border-slate-700/50 max-w-full">
-        <div className="flex items-center gap-1.5 text-[11px] sm:text-xs font-black uppercase text-[#F26522] tracking-wider pr-2 border-r border-slate-700">
-          <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#F26522] animate-bounce" />
+      <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-slate-900 to-[#002257] text-white shadow-md border border-slate-700/50">
+        <div className="flex items-center gap-1.5 text-[11px] font-black uppercase text-[#F26522] tracking-wider pr-2 border-r border-slate-700">
+          <Flame className="w-3.5 h-3.5 text-[#F26522] animate-bounce" />
           <span>Countdown</span>
         </div>
-        <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-black tracking-tight font-mono">
+        <div className="flex items-center gap-2 text-xs font-black tracking-tight font-mono">
           <div className="flex flex-col items-center">
-            <span className="text-xs sm:text-sm font-extrabold text-white">{timeLeft.days}</span>
-            <span className="text-[8px] sm:text-[9px] font-medium text-slate-400 -mt-0.5">DAYS</span>
+            <span className="text-xs font-extrabold text-white">{timeLeft.days}</span>
+            <span className="text-[8px] font-medium text-slate-400 -mt-0.5">DAYS</span>
           </div>
           <span className="text-slate-500">:</span>
           <div className="flex flex-col items-center">
-            <span className="text-xs sm:text-sm font-extrabold text-white">{String(timeLeft.hours).padStart(2, "0")}</span>
-            <span className="text-[8px] sm:text-[9px] font-medium text-slate-400 -mt-0.5">HRS</span>
+            <span className="text-xs font-extrabold text-white">{String(timeLeft.hours).padStart(2, "0")}</span>
+            <span className="text-[8px] font-medium text-slate-400 -mt-0.5">HRS</span>
           </div>
           <span className="text-slate-500">:</span>
           <div className="flex flex-col items-center">
-            <span className="text-xs sm:text-sm font-extrabold text-white">{String(timeLeft.minutes).padStart(2, "0")}</span>
-            <span className="text-[8px] sm:text-[9px] font-medium text-slate-400 -mt-0.5">MIN</span>
+            <span className="text-xs font-extrabold text-white">{String(timeLeft.minutes).padStart(2, "0")}</span>
+            <span className="text-[8px] font-medium text-slate-400 -mt-0.5">MIN</span>
           </div>
           <span className="text-slate-500">:</span>
           <div className="flex flex-col items-center">
-            <span className="text-xs sm:text-sm font-extrabold text-[#F26522]">{String(timeLeft.seconds).padStart(2, "0")}</span>
-            <span className="text-[8px] sm:text-[9px] font-medium text-slate-400 -mt-0.5">SEC</span>
+            <span className="text-xs font-extrabold text-[#F26522]">{String(timeLeft.seconds).padStart(2, "0")}</span>
+            <span className="text-[8px] font-medium text-slate-400 -mt-0.5">SEC</span>
           </div>
         </div>
       </div>
