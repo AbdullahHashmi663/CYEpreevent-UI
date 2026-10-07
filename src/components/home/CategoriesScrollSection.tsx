@@ -3,6 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowUpRight, Sparkles } from "lucide-react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { animate as animeJs } from "animejs";
+
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 type ThemeColor = "orange" | "blue" | "green" | "white";
 
@@ -136,7 +143,60 @@ export default function CategoriesScrollSection() {
   const containerRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
   const isScheduledRef = useRef<boolean>(false);
+  const prevActiveRef = useRef<number>(0);
 
+  // ── Left column refs for GSAP section-entry animation ─────────────────────
+  const leftColRef = useRef<HTMLDivElement>(null);
+  const rightColRef = useRef<HTMLDivElement>(null);
+
+  // ── GSAP: section entry animation ─────────────────────────────────────────
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const ctx = gsap.context(() => {
+      // Left sticky column fades from left
+      gsap.fromTo(
+        leftColRef.current,
+        { opacity: 0, x: -40 },
+        {
+          opacity: 1,
+          x: 0,
+          duration: 0.9,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: containerRef.current,
+            start: "top 82%",
+            once: true,
+          },
+        }
+      );
+
+      // Right column items stagger up
+      const items = rightColRef.current?.querySelectorAll(":scope > div");
+      if (items) {
+        gsap.fromTo(
+          items,
+          { opacity: 0, y: 50 },
+          {
+            opacity: 1,
+            y: 0,
+            stagger: 0.07,
+            duration: 0.65,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: rightColRef.current,
+              start: "top 82%",
+              once: true,
+            },
+          }
+        );
+      }
+    });
+
+    return () => ctx.revert();
+  }, []);
+
+  // ── Scroll tracking ────────────────────────────────────────────────────────
   useEffect(() => {
     const checkActiveItem = () => {
       isScheduledRef.current = false;
@@ -146,10 +206,7 @@ export default function CategoriesScrollSection() {
       const containerRect = container.getBoundingClientRect();
       const windowHeight = window.innerHeight;
 
-      // Skip calculation completely if section is off-screen
-      if (containerRect.bottom < 0 || containerRect.top > windowHeight) {
-        return;
-      }
+      if (containerRect.bottom < 0 || containerRect.top > windowHeight) return;
 
       const viewportCenter = windowHeight / 2;
       let closestIdx = activeIndexRef.current;
@@ -160,14 +217,12 @@ export default function CategoriesScrollSection() {
         const rect = el.getBoundingClientRect();
         const itemCenter = rect.top + rect.height / 2;
         const distance = Math.abs(viewportCenter - itemCenter);
-
         if (distance < minDistance) {
           minDistance = distance;
           closestIdx = index;
         }
       });
 
-      // Only trigger React state update if the active index actually changed
       if (closestIdx !== activeIndexRef.current) {
         activeIndexRef.current = closestIdx;
         setActiveIndex(closestIdx);
@@ -187,32 +242,65 @@ export default function CategoriesScrollSection() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // ── AnimeJS: animate active item headline on change ───────────────────────
+  useEffect(() => {
+    const prev = prevActiveRef.current;
+    if (prev === activeIndex) return;
+    prevActiveRef.current = activeIndex;
+
+    const activeEl = itemRefs.current[activeIndex];
+    if (!activeEl) return;
+
+    const headline = activeEl.querySelector("h2");
+    if (headline) {
+      animeJs(headline as HTMLElement, {
+        translateX: [-6, 0],
+        opacity: [0.6, 1],
+        duration: 380,
+        ease: "outCubic",
+      });
+    }
+
+    const arrowBtn = activeEl.querySelector(".cat-arrow");
+    if (arrowBtn) {
+      animeJs(arrowBtn as HTMLElement, {
+        scale: [0.7, 1.1, 1],
+        rotate: ["-15deg", "0deg"],
+        duration: 400,
+        ease: "outBack(1.7)",
+      });
+    }
+  }, [activeIndex]);
+
   const activeCategory = CATEGORIES_DATA[activeIndex] || CATEGORIES_DATA[0];
 
   return (
     <section
-      ref={containerRef}
+      ref={containerRef as React.RefObject<HTMLElement>}
       className="relative bg-gradient-to-br from-[#002257] via-[#083a22] to-[#021329] text-white py-24 sm:py-32 overflow-hidden border-y border-white/15 select-none"
     >
       {/* Radiant Top Luminous White Glow Overlay */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(255,255,255,0.16),transparent)] pointer-events-none" />
 
-      {/* Dynamic Ambient Background Glows: High-performance precomputed radial gradients */}
+      {/* Dynamic Ambient Background Glows */}
       <div className="absolute -top-20 -left-20 w-[550px] h-[550px] bg-[radial-gradient(circle,rgba(0,59,150,0.45)_0%,transparent_70%)] pointer-events-none" />
       <div className="absolute -bottom-20 -right-20 w-[550px] h-[550px] bg-[radial-gradient(circle,rgba(22,124,56,0.4)_0%,transparent_70%)] pointer-events-none" />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] h-[420px] bg-[radial-gradient(circle,rgba(255,255,255,0.08)_0%,transparent_70%)] pointer-events-none" />
 
-      {/* Decorative top and bottom gradient accent borders (Blue -> White -> Green) */}
+      {/* Decorative gradient accent borders */}
       <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#003B96]/60 via-white/50 via-[#167C38]/60 to-transparent" />
       <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#167C38]/60 via-white/50 via-[#003B96]/60 to-transparent" />
 
       <div className="w-full px-3 sm:px-8 lg:px-12 xl:px-16 max-w-7xl mx-auto">
         <div className="grid grid-cols-12 gap-2 sm:gap-6 md:gap-8 items-start relative">
-          
+
           {/* Left Vertical Label Column */}
-          <div className="col-span-3 sm:col-span-2 flex flex-col items-center justify-start sticky top-36 z-20 pt-4 pl-0 sm:pl-2">
+          <div
+            ref={leftColRef}
+            className="col-span-3 sm:col-span-2 flex flex-col items-center justify-start sticky top-36 z-20 pt-4 pl-0 sm:pl-2"
+          >
             <div className="flex flex-col items-center gap-5 sm:gap-6">
-              {/* Dynamic glowing pulsing indicator matching active item */}
+              {/* Dynamic glowing pulsing indicator */}
               <div className="relative flex items-center justify-center">
                 <div
                   className={`w-3 h-3 rounded-full animate-ping absolute ${
@@ -237,7 +325,7 @@ export default function CategoriesScrollSection() {
                   }`}
                 />
               </div>
-              
+
               {/* Vertical Rotated Text */}
               <span
                 className="text-[10px] sm:text-xs md:text-sm font-black uppercase tracking-[0.25em] sm:tracking-[0.35em] bg-gradient-to-b from-white via-slate-300 to-slate-500 bg-clip-text text-transparent transform -rotate-90 origin-center whitespace-nowrap py-4 sm:py-6"
@@ -246,7 +334,7 @@ export default function CategoriesScrollSection() {
                 CATEGORIES
               </span>
 
-              {/* Progress counter with brand colors */}
+              {/* Progress counter */}
               <div className="flex flex-col items-center text-[10px] sm:text-[11px] font-black font-mono">
                 <span className="text-[#F26522]">
                   {String(activeIndex + 1).padStart(2, "0")}
@@ -260,7 +348,10 @@ export default function CategoriesScrollSection() {
           </div>
 
           {/* Right Stacked Category Titles */}
-          <div className="col-span-9 sm:col-span-10 space-y-6 sm:space-y-12 lg:space-y-16 pl-2.5 sm:pl-6 border-l border-white/10 relative">
+          <div
+            ref={rightColRef}
+            className="col-span-9 sm:col-span-10 space-y-6 sm:space-y-12 lg:space-y-16 pl-2.5 sm:pl-6 border-l border-white/10 relative"
+          >
             {CATEGORIES_DATA.map((cat, idx) => {
               const isActive = activeIndex === idx;
 
@@ -315,9 +406,9 @@ export default function CategoriesScrollSection() {
                         {cat.name}
                       </h2>
 
-                      {/* Arrow CTA Button - slightly offset to the left on mobile */}
+                      {/* Arrow CTA Button */}
                       <div
-                        className={`w-8 h-8 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl flex-shrink-0 flex items-center justify-center transition-all duration-300 mr-2.5 sm:mr-0 ${
+                        className={`cat-arrow w-8 h-8 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl flex-shrink-0 flex items-center justify-center transition-all duration-300 mr-2.5 sm:mr-0 ${
                           isActive
                             ? `bg-white ${cat.iconTextColor} scale-100 opacity-100 shadow-xl shadow-white/15`
                             : "bg-white/5 text-slate-600 scale-90 opacity-0 group-hover:opacity-100 group-hover:text-white group-hover:bg-white/15"
@@ -337,4 +428,3 @@ export default function CategoriesScrollSection() {
     </section>
   );
 }
-

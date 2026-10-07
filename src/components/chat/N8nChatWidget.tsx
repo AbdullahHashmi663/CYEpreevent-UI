@@ -18,7 +18,7 @@ interface ChatMessage {
 const FAQ_KNOWLEDGE: { pattern: RegExp; response: string; quickLinks?: { text: string; href: string }[] }[] = [
   {
     pattern: /when|date|time|timing|schedule|day/i,
-    response: "The **Capital Youth Expo Pre-Event** takes place on **Thursday, 1st October 2026** from **09:00 AM to 05:00 PM PST** at Bahria University (BUIC) E-8 Campus, Islamabad.",
+    response: "The **Capital Youth Expo Pre-Event** takes place on **Tuesday, 10th November 2026** from **09:00 AM to 05:00 PM PST** at Bahria University (BUIC) E-8 Campus, Islamabad.",
     quickLinks: [{ text: "View Venue & Timings", href: "/venue" }],
   },
   {

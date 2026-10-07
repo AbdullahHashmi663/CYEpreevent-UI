@@ -75,7 +75,7 @@ const ALL_COMPETITIONS: CompetitionItem[] = [
     duration: "6 Hours Sprint + Pitching",
     prize: "Winner Shield + Mentorship + Cash Prize",
     rules: [
-      "Themes and problem statements unveiled on the morning of 1st October 2026.",
+      "Themes and problem statements unveiled on the morning of 10th November 2026.",
       "All code and assets must be developed on-site during the expo hours.",
       "Each team gets 5 minutes to demo their live project followed by 3 minutes Q&A with judges.",
       "Open-source libraries and public frameworks are permitted with proper attribution.",
@@ -261,7 +261,7 @@ export default function CompetitionsPage() {
               Competitions & Conferences
             </h1>
             <p className="text-slate-500 text-sm sm:text-base font-medium leading-relaxed">
-              Explore 9 competitive tracks across Technology, Literary Arts, Fine Art, Gaming, and Conferences at Bahria University on 1st October 2026.
+              Explore 9 competitive tracks across Technology, Literary Arts, Fine Art, Gaming, and Conferences at Bahria University on 10th November 2026.
             </p>
           </div>
 

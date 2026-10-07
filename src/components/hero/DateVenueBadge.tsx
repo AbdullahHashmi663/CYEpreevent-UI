@@ -12,8 +12,8 @@ export default function DateVenueBadge() {
   }>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
   useEffect(() => {
-    // Target event date: 1st October 2026 09:00 AM PST
-    const eventDate = new Date("2026-10-01T09:00:00+05:00").getTime();
+    // Target event date: 10th November 2026 09:00 AM PST
+    const eventDate = new Date("2026-11-10T09:00:00+05:00").getTime();
 
     const updateCountdown = () => {
       const now = new Date().getTime();
@@ -45,10 +45,10 @@ export default function DateVenueBadge() {
           </div>
           <div className="flex flex-col">
             <span className="text-xs font-black text-slate-900 leading-tight">
-              1st October 2026
+              10th November 2026
             </span>
             <span className="text-[10px] font-black text-[#167C38] tracking-wider uppercase mt-0.5">
-              THURSDAY • FULL DAY EXPO
+              TUESDAY • FULL DAY EXPO
             </span>
           </div>
         </div>

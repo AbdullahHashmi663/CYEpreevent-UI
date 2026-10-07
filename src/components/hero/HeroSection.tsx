@@ -1,9 +1,12 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import Image from "next/image";
 import { ArrowRight, Sparkles, Trophy, ChevronRight } from "lucide-react";
 import DateVenueBadge from "./DateVenueBadge";
 import PresentedByBanner from "./PresentedByBanner";
+import gsap from "gsap";
+import { animate as animeJs } from "animejs";
 
 interface HeroSectionProps {
   onExploreClick?: () => void;
@@ -11,11 +14,123 @@ interface HeroSectionProps {
 }
 
 export default function HeroSection({ onExploreClick, onRegisterClick }: HeroSectionProps) {
+  const heroRef = useRef<HTMLElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const taglineRef = useRef<HTMLDivElement>(null);
+  const badgeRef = useRef<HTMLDivElement>(null);
+  const ctaRef = useRef<HTMLDivElement>(null);
+  const bannerRef = useRef<HTMLDivElement>(null);
+  const verticalBannerRef = useRef<HTMLDivElement>(null);
+  const exploreIndicatorRef = useRef<HTMLDivElement>(null);
+
+  // ── Entrance animations on mount ──────────────────────────────────────────
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+
+    // Vertical orange side banner slides down
+    tl.fromTo(
+      verticalBannerRef.current,
+      { scaleY: 0, transformOrigin: "top center", opacity: 0 },
+      { scaleY: 1, opacity: 1, duration: 0.9 },
+      0
+    );
+
+    // Tagline with decorative dots fades up
+    tl.fromTo(
+      taglineRef.current,
+      { opacity: 0, y: 28 },
+      { opacity: 1, y: 0, duration: 0.7 },
+      0.35
+    );
+
+    // Title lines cascade in
+    if (titleRef.current) {
+      const lines = titleRef.current.querySelectorAll("span");
+      tl.fromTo(
+        lines,
+        { opacity: 0, x: -55, skewX: -4 },
+        { opacity: 1, x: 0, skewX: 0, stagger: 0.12, duration: 0.75 },
+        0.55
+      );
+    }
+
+    // Badge
+    tl.fromTo(
+      badgeRef.current,
+      { opacity: 0, scale: 0.85, y: 20 },
+      { opacity: 1, scale: 1, y: 0, duration: 0.65 },
+      1.1
+    );
+
+    // CTA buttons
+    tl.fromTo(
+      ctaRef.current?.children ?? [],
+      { opacity: 0, y: 22 },
+      { opacity: 1, y: 0, stagger: 0.12, duration: 0.6 },
+      1.35
+    );
+
+    // Banner + explore indicator
+    tl.fromTo(
+      bannerRef.current,
+      { opacity: 0, y: 18 },
+      { opacity: 1, y: 0, duration: 0.6 },
+      1.55
+    );
+    tl.fromTo(
+      exploreIndicatorRef.current,
+      { opacity: 0, y: 14 },
+      { opacity: 1, y: 0, duration: 0.5 },
+      1.7
+    );
+
+    // ── Continuous subtle floating on the whole hero content ──────────────
+    gsap.to(titleRef.current, {
+      y: "+=8",
+      duration: 3.5,
+      yoyo: true,
+      repeat: -1,
+      ease: "sine.inOut",
+    });
+
+    // ── AnimeJS v4: pulsing explore indicator dots ───────────────────────────
+    if (exploreIndicatorRef.current) {
+      const dots = Array.from(
+        exploreIndicatorRef.current.querySelectorAll(".indicator-dot")
+      ) as HTMLElement[];
+      dots.forEach((dot, i) => {
+        animeJs(dot, {
+          scale: [1, 1.5, 1],
+          opacity: [1, 0.4, 1],
+          duration: 1400,
+          delay: i * 200,
+          loop: true,
+          ease: "inOutSine",
+        });
+      });
+    }
+  }, []);
+
+  // ── AnimeJS: CTA button micro-wobble on click ─────────────────────────────
+  const handleRegisterClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    animeJs(e.currentTarget, {
+      scale: [1, 0.94, 1.04, 1],
+      duration: 380,
+      ease: "outElastic(1, 0.6)",
+    });
+    onRegisterClick?.();
+  };
+
   return (
-    <section className="relative w-full flex-1 flex flex-col justify-between pt-1 sm:pt-2 pb-1 overflow-hidden">
+    <section ref={heroRef} className="relative w-full flex-1 flex flex-col justify-between pt-1 sm:pt-2 pb-1 overflow-hidden">
 
       {/* ==================== CYBER LEFT FLOATING VERTICAL BANNER (BUIC 2026) ==================== */}
-      <div className="absolute left-2 sm:left-3 md:left-4 top-3 sm:top-4 bottom-4 sm:bottom-6 z-20 w-6 sm:w-7 md:w-7.5 bg-gradient-to-b from-[#F26522] via-[#EA580C] to-[#F26522] rounded-full border border-white/20 shadow-[0_6px_20px_rgba(242,101,34,0.35)] flex flex-col justify-between items-center py-4 sm:py-5 select-none pointer-events-none">
+      <div
+        ref={verticalBannerRef}
+        className="absolute left-2 sm:left-3 md:left-4 top-3 sm:top-4 bottom-4 sm:bottom-6 z-20 w-6 sm:w-7 md:w-7.5 bg-gradient-to-b from-[#F26522] via-[#EA580C] to-[#F26522] rounded-full border border-white/20 shadow-[0_6px_20px_rgba(242,101,34,0.35)] flex flex-col justify-between items-center py-4 sm:py-5 select-none pointer-events-none"
+      >
         {/* Top Vertical Text */}
         <div className="flex flex-col items-center">
           <span className="[writing-mode:vertical-rl] rotate-180 text-white font-black tracking-[0.25em] text-[9px] sm:text-[10px] md:text-[11px] uppercase drop-shadow-xs">
@@ -46,11 +161,11 @@ export default function HeroSection({ onExploreClick, onRegisterClick }: HeroSec
           {/* Left Hero Headlines & Metadata */}
           <div className="lg:col-span-7 xl:col-span-6 space-y-3.5 sm:space-y-4 text-left">
             {/* Stylized Flagship Pre-Event Tagline */}
-            <div className="inline-flex items-center gap-1.5 sm:gap-2 select-none pt-0.5">
+            <div ref={taglineRef} className="inline-flex items-center gap-1.5 sm:gap-2 select-none pt-0.5">
               {/* Left Dots + Horizontal Line */}
               <div className="flex items-center gap-1">
-                <span className="w-1 h-1 rounded-full bg-[#F26522]" />
-                <span className="w-1.5 h-1.5 rounded-full bg-[#F26522]" />
+                <span className="indicator-dot w-1 h-1 rounded-full bg-[#F26522]" />
+                <span className="indicator-dot w-1.5 h-1.5 rounded-full bg-[#F26522]" />
                 <span className="w-6 sm:w-10 h-[2px] bg-[#F26522] rounded-full" />
               </div>
 
@@ -62,13 +177,16 @@ export default function HeroSection({ onExploreClick, onRegisterClick }: HeroSec
               {/* Right Horizontal Line + Dots */}
               <div className="flex items-center gap-1">
                 <span className="w-6 sm:w-10 h-[2px] bg-[#F26522] rounded-full" />
-                <span className="w-1.5 h-1.5 rounded-full bg-[#F26522]" />
-                <span className="w-1 h-1 rounded-full bg-[#F26522]" />
+                <span className="indicator-dot w-1.5 h-1.5 rounded-full bg-[#F26522]" />
+                <span className="indicator-dot w-1 h-1 rounded-full bg-[#F26522]" />
               </div>
             </div>
 
             {/* Bold Multi-colored Main Title */}
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[66px] xl:text-[74px] font-black tracking-tight leading-[0.95] select-none">
+            <h1
+              ref={titleRef}
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-[66px] xl:text-[74px] font-black tracking-tight leading-[0.95] select-none"
+            >
               <span className="block text-[#003B96] drop-shadow-xs">CAPITAL</span>
               <span className="block text-[#167C38] drop-shadow-xs">YOUTH EXPO</span>
               <span className="block text-[#F26522] drop-shadow-xs">PRE EVENT</span>
@@ -76,13 +194,15 @@ export default function HeroSection({ onExploreClick, onRegisterClick }: HeroSec
             </h1>
 
             {/* Date & Venue Info Badges with Live Countdown */}
-            <DateVenueBadge />
+            <div ref={badgeRef}>
+              <DateVenueBadge />
+            </div>
 
             {/* Dual CTA Buttons */}
-            <div className="flex flex-wrap items-center gap-3 pt-1">
+            <div ref={ctaRef} className="flex flex-wrap items-center gap-3 pt-1">
               {/* Luminous Blue Aurora Button (Register for Competitions) */}
               <button
-                onClick={onRegisterClick}
+                onClick={handleRegisterClick}
                 className="relative group inline-flex items-center justify-center rounded-full transition-all duration-300 transform hover:-translate-y-0.5 cursor-pointer"
               >
                 {/* Compact Ambient Blue Glow - Only Visible on Hover */}
@@ -106,7 +226,7 @@ export default function HeroSection({ onExploreClick, onRegisterClick }: HeroSec
                 </span>
               </button>
 
-              {/* Custom Liquid Animated Gradient Border Button (White Body, Thick Liquid Border, Chevron >) */}
+              {/* Custom Liquid Animated Gradient Border Button */}
               <a
                 href="#explore"
                 onClick={(e) => {
@@ -117,10 +237,10 @@ export default function HeroSection({ onExploreClick, onRegisterClick }: HeroSec
                 }}
                 className="relative group inline-flex items-center justify-center p-[3.5px] rounded-full overflow-hidden transition-all duration-300 transform hover:-translate-y-0.5 cursor-pointer shadow-md"
               >
-                {/* Default Subtle Boundary Layer (Image 1) */}
+                {/* Default Subtle Boundary Layer */}
                 <span className="absolute inset-0 rounded-full border border-slate-300 bg-white group-hover:opacity-0 transition-opacity duration-300" />
 
-                {/* Animated Liquid Gradient Rotating Border on Hover (Image 2 - Thick Boundary) */}
+                {/* Animated Liquid Gradient Rotating Border on Hover */}
                 <span className="absolute -inset-[250%] rounded-full bg-cye-liquid animate-liquid-spin opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-[0.5px]" />
 
                 {/* Inner White Pill Container */}
@@ -138,15 +258,18 @@ export default function HeroSection({ onExploreClick, onRegisterClick }: HeroSec
       </div>
 
       {/* Floating Presented By Sub-Hero Banner */}
-      <div className="relative z-20 mt-auto pl-10 sm:pl-16 md:pl-20 lg:pl-24 pr-4 sm:pr-8 pb-1">
+      <div ref={bannerRef} className="relative z-20 mt-auto pl-10 sm:pl-16 md:pl-20 lg:pl-24 pr-4 sm:pr-8 pb-1">
         <PresentedByBanner />
 
         {/* Explore What Awaits You Section Indicator */}
-        <div className="flex items-center justify-center gap-3 pt-2.5 pb-1 text-[11px] font-black text-slate-600 uppercase tracking-widest select-none">
+        <div
+          ref={exploreIndicatorRef}
+          className="flex items-center justify-center gap-3 pt-2.5 pb-1 text-[11px] font-black text-slate-600 uppercase tracking-widest select-none"
+        >
           <span className="w-10 h-[2px] bg-gradient-to-r from-transparent to-[#003B96]" />
-          <span className="w-1.5 h-1.5 rounded-full bg-[#003B96]" />
+          <span className="indicator-dot w-1.5 h-1.5 rounded-full bg-[#003B96]" />
           <span className="text-slate-900 font-extrabold">EXPLORE WHAT AWAITS YOU</span>
-          <span className="w-1.5 h-1.5 rounded-full bg-[#F26522]" />
+          <span className="indicator-dot w-1.5 h-1.5 rounded-full bg-[#F26522]" />
           <span className="w-10 h-[2px] bg-gradient-to-l from-transparent to-[#F26522]" />
         </div>
       </div>

@@ -145,7 +145,7 @@ export default function InitialPageLoader() {
               </span>
               <span className="text-slate-300">•</span>
               <span className="text-[11px] sm:text-xs font-black text-[#F26522] uppercase">
-                1st Oct 2026
+                10th Nov 2026
               </span>
             </motion.div>
 
@@ -185,7 +185,7 @@ export default function InitialPageLoader() {
                 <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-white shadow-[0_15px_35px_-8px_rgba(0,59,150,0.18)] border border-slate-100 p-3 flex items-center justify-center">
                   <div className="relative w-full h-full">
                     <Image
-                      src="/images/logo-removebg-preview 8.png"
+                      src="/cye-logo.png"
                       alt="Capital Youth Expo"
                       fill
                       priority
@@ -218,7 +218,7 @@ export default function InitialPageLoader() {
               </div>
 
               {/* Liquid Progress Bar */}
-              <div className="w-full space-y-2">
+              <div className="w-full">
                 <div className="relative w-full h-2 rounded-full bg-slate-100 overflow-hidden border border-slate-200 shadow-inner">
                   <motion.div
                     className="h-full rounded-full bg-gradient-to-r from-[#003B96] via-[#F26522] to-[#167C38] relative"
@@ -228,11 +228,6 @@ export default function InitialPageLoader() {
                     <div className="absolute right-0 top-0 bottom-0 w-3 bg-white/90 blur-2xs rounded-full" />
                   </motion.div>
                 </div>
-
-                {/* Live Loading Milestone Label */}
-                <p className="text-[11px] sm:text-xs font-semibold text-slate-500 truncate px-2">
-                  {statusMessage}
-                </p>
               </div>
 
               {/* 4 Interactive Track Steppers */}
@@ -267,18 +262,8 @@ export default function InitialPageLoader() {
 
             </div>
 
-            {/* Bottom Organizer Footer Badge */}
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              className="flex items-center gap-2 text-[10px] sm:text-[11px] text-slate-400 font-bold uppercase tracking-wider"
-            >
-              <span>Presented by</span>
-              <span className="text-[#003B96] font-black">Al Nakhla</span>
-              <span>•</span>
-              <span className="text-[#F26522] font-black">Youth Insight</span>
-            </motion.div>
+            {/* Spacer for symmetrical vertical balance */}
+            <div className="h-7 pointer-events-none" aria-hidden="true" />
 
           </motion.div>
         </div>

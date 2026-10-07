@@ -141,14 +141,14 @@ export default function ConferencesPage() {
 
               {/* Subtitle */}
               <p className="text-slate-600 text-sm sm:text-base lg:text-lg max-w-2xl mx-auto font-medium leading-relaxed">
-                Immerse yourself in thought leadership, soul-stirring keynotes, and high-impact career masterclasses featuring top thought leaders at Bahria University on <strong className="text-slate-900 font-bold">Thursday, 1st October 2026</strong>.
+                Immerse yourself in thought leadership, soul-stirring keynotes, and high-impact career masterclasses featuring top thought leaders at Bahria University on <strong className="text-slate-900 font-bold">Tuesday, 10th November 2026</strong>.
               </p>
 
               {/* Quick Info Bar */}
               <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 pt-2 text-xs font-bold text-slate-700">
                 <div className="flex items-center gap-2 bg-white px-4 py-2.5 rounded-2xl border border-slate-200/90 shadow-xs">
                   <Calendar className="w-4 h-4 text-[#F26522]" />
-                  <span>Thursday, 1st October 2026</span>
+                  <span>Tuesday, 10th November 2026</span>
                 </div>
                 <div className="flex items-center gap-2 bg-white px-4 py-2.5 rounded-2xl border border-slate-200/90 shadow-xs">
                   <Clock className="w-4 h-4 text-[#003B96]" />
@@ -364,7 +364,7 @@ export default function ConferencesPage() {
         </section>
 
         {/* ==================== 3. WORKSHOP SPOTLIGHT: CAREER PRO ==================== */}
-        <section className="py-20 bg-white border-y border-slate-200 relative">
+        <section id="workshops" className="py-20 bg-white border-y border-slate-200 relative scroll-mt-24">
           <div className="w-full px-4 sm:px-8 lg:px-12 xl:px-16 max-w-7xl mx-auto space-y-10">
             
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200 pb-6">
@@ -472,7 +472,7 @@ export default function ConferencesPage() {
                 Auditorium Agenda & Timings
               </h2>
               <p className="text-xs sm:text-sm text-slate-500 font-medium">
-                Plan your day at Bahria University on Thursday, 1st October 2026.
+                Plan your day at Bahria University on Tuesday, 10th November 2026.
               </p>
             </div>
 

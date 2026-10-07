@@ -69,7 +69,7 @@ const MASTER_PLAN_STAGES = [
   {
     stage: "Stage 6",
     title: "Grand Main Event at BUIC",
-    desc: "Parallel competitive tracks, CYE Nexus, and Career Pro Talks culminate at Bahria University Islamabad Campus on 1st Oct 2026.",
+    desc: "Parallel competitive tracks, CYE Nexus, and Career Pro Talks culminate at Bahria University Islamabad Campus on 10th Nov 2026.",
     tag: "Expo Day Execution",
     color: "bg-[#F26522] text-white",
   },
@@ -96,7 +96,7 @@ const FAQ_ITEMS = [
     id: 3,
     question: "How and when will certificates and shields be distributed?",
     answer:
-      "Official Certificates of Leadership and commemorative shields will be presented on stage during the Grand Closing Ceremony of the CYE Pre-Event at Bahria University on 1st October 2026.",
+      "Official Certificates of Leadership and commemorative shields will be presented on stage during the Grand Closing Ceremony of the CYE Pre-Event at Bahria University on 10th November 2026.",
     iconColor: "bg-orange-100 text-orange-600",
     icon: Shield,
   },
@@ -237,7 +237,7 @@ export default function AmbassadorsPage() {
 
                 <p className="text-xs sm:text-sm text-slate-600 max-w-lg mx-auto font-medium leading-relaxed">
                   Represent Capital Youth Expo Pre-Event at BUIC on{" "}
-                  <strong className="text-slate-900 font-bold">1st October 2026</strong>. Lead your campus community, gain leadership experience, and earn official honors.
+                  <strong className="text-slate-900 font-bold">10th November 2026</strong>. Lead your campus community, gain leadership experience, and earn official honors.
                 </p>
 
                 {/* Hero Action Buttons */}
@@ -295,7 +295,7 @@ export default function AmbassadorsPage() {
                   Master Plan: 6 Stages to Grand Expo
                 </h2>
                 <p className="text-slate-500 text-sm sm:text-base font-medium">
-                  The step-by-step organizational journey connecting campus ambassadors to the main event execution on 1st October 2026.
+                  The step-by-step organizational journey connecting campus ambassadors to the main event execution on 10th November 2026.
                 </p>
               </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -33,12 +33,21 @@ import {
   Briefcase,
 } from "lucide-react";
 
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { animate as animeJs } from "animejs";
+
 import Header from "@/components/layout/Header";
 import HeroSection from "@/components/hero/HeroSection";
 import CategoriesScrollSection from "@/components/home/CategoriesScrollSection";
 import RegisterModal from "@/components/registration/RegisterModal";
 import Footer from "@/components/layout/Footer";
 import { COMPETITIONS_LIST, applyForAmbassador } from "@/lib/api";
+
+// Register GSAP plugins only once (client-side guard)
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 const COMPETITION_DETAILS = [
   {
@@ -148,7 +157,7 @@ const MASTER_PLAN_STAGES = [
   {
     stage: "Stage 6",
     title: "Main Event: Competitions & Conferences",
-    desc: "Parallel competitive tracks, CYE Nexus, and Career Pro Talks held live at BUIC E-8 on 1st Oct 2026.",
+    desc: "Parallel competitive tracks, CYE Nexus, and Career Pro Talks held live at BUIC E-8 on 10th Nov 2026.",
     tag: "Grand Expo",
     color: "bg-[#F26522] text-white",
   },
@@ -175,7 +184,7 @@ const FAQ_ITEMS = [
     id: 3,
     question: "How and when will certificates and shields be distributed?",
     answer:
-      "Official certificates of leadership and appreciation shields will be awarded during the closing ceremony of the CYE Pre-Event at BUIC on 1st October 2026.",
+      "Official certificates of leadership and appreciation shields will be awarded during the closing ceremony of the CYE Pre-Event at BUIC on 10th November 2026.",
     iconColor: "bg-orange-100 text-orange-600",
     icon: Shield,
   },
@@ -204,6 +213,394 @@ export default function Home() {
   const [formLoading, setFormLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+
+  // ─── Section Refs for GSAP ─────────────────────────────────────────────────
+  const competitionsSectionRef = useRef<HTMLElement>(null);
+  const competitionsHeadRef = useRef<HTMLDivElement>(null);
+  const competitionsGridRef = useRef<HTMLDivElement>(null);
+
+  const conferenceSectionRef = useRef<HTMLElement>(null);
+  const conferenceLeftRef = useRef<HTMLDivElement>(null);
+  const conferenceRightRef = useRef<HTMLDivElement>(null);
+
+  const masterPlanHeadRef = useRef<HTMLDivElement>(null);
+  const masterPlanGridRef = useRef<HTMLDivElement>(null);
+
+  const ambassadorSectionRef = useRef<HTMLElement>(null);
+  const ambassadorTextRef = useRef<HTMLDivElement>(null);
+  const ambassadorLeftImgRef = useRef<HTMLDivElement>(null);
+  const ambassadorRightImgRef = useRef<HTMLDivElement>(null);
+
+  const benefitsSectionRef = useRef<HTMLElement>(null);
+  const benefitsCardsRef = useRef<HTMLDivElement>(null);
+
+  const faqSectionRef = useRef<HTMLElement>(null);
+  const faqListRef = useRef<HTMLDivElement>(null);
+
+  const formSectionRef = useRef<HTMLElement>(null);
+  const formCardRef = useRef<HTMLDivElement>(null);
+
+  const footerRef = useRef<HTMLElement>(null);
+
+  // ─── GSAP Scroll Animations ────────────────────────────────────────────────
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const ctx = gsap.context(() => {
+
+      // ── 1. Competitions section heading
+      if (competitionsHeadRef.current) {
+        gsap.from(competitionsHeadRef.current.children, {
+          opacity: 0,
+          y: 55,
+          stagger: 0.14,
+          duration: 0.85,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: competitionsHeadRef.current,
+            start: "top 88%",
+            once: true,
+          },
+        });
+      }
+
+      // ── 2. Competition cards – cascade stagger with a slight x drift
+      if (competitionsGridRef.current) {
+        const cards = competitionsGridRef.current.querySelectorAll(":scope > div");
+        gsap.fromTo(
+          cards,
+          { opacity: 0, y: 70, scale: 0.94 },
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            stagger: 0.1,
+            duration: 0.75,
+            ease: "back.out(1.4)",
+            scrollTrigger: {
+              trigger: competitionsGridRef.current,
+              start: "top 85%",
+              once: true,
+            },
+          }
+        );
+      }
+
+      // ── 3. Conference section – left slides in from left, right from right
+      if (conferenceLeftRef.current) {
+        gsap.fromTo(
+          conferenceLeftRef.current,
+          { opacity: 0, x: -80 },
+          {
+            opacity: 1,
+            x: 0,
+            duration: 1,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: conferenceLeftRef.current,
+              start: "top 85%",
+              once: true,
+            },
+          }
+        );
+      }
+      if (conferenceRightRef.current) {
+        gsap.fromTo(
+          conferenceRightRef.current,
+          { opacity: 0, x: 80, scale: 0.9 },
+          {
+            opacity: 1,
+            x: 0,
+            scale: 1,
+            duration: 1,
+            delay: 0.15,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: conferenceRightRef.current,
+              start: "top 85%",
+              once: true,
+            },
+          }
+        );
+      }
+
+      // ── 4. Master Plan heading
+      if (masterPlanHeadRef.current) {
+        gsap.from(masterPlanHeadRef.current.children, {
+          opacity: 0,
+          y: 45,
+          stagger: 0.15,
+          duration: 0.8,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: masterPlanHeadRef.current,
+            start: "top 88%",
+            once: true,
+          },
+        });
+      }
+
+      // ── 5. Master Plan cards – sequential cascade
+      if (masterPlanGridRef.current) {
+        const stageCards = masterPlanGridRef.current.querySelectorAll(":scope > div");
+        gsap.fromTo(
+          stageCards,
+          { opacity: 0, y: 60, rotationX: 25, transformOrigin: "top center" },
+          {
+            opacity: 1,
+            y: 0,
+            rotationX: 0,
+            stagger: 0.13,
+            duration: 0.75,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: masterPlanGridRef.current,
+              start: "top 85%",
+              once: true,
+            },
+          }
+        );
+      }
+
+      // ── 6. Ambassador section – CYE letters bounce in, then text
+      if (ambassadorTextRef.current) {
+        // Big CYE letters separate from rest
+        const bigLetters = ambassadorTextRef.current.querySelectorAll(".cye-letter");
+        if (bigLetters.length) {
+          gsap.fromTo(
+            bigLetters,
+            { opacity: 0, y: -60, scale: 0.4 },
+            {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              stagger: 0.1,
+              duration: 0.7,
+              ease: "back.out(2)",
+              scrollTrigger: {
+                trigger: ambassadorTextRef.current,
+                start: "top 85%",
+                once: true,
+              },
+            }
+          );
+        }
+        // Rest of text children
+        const rest = ambassadorTextRef.current.querySelectorAll(".amb-reveal");
+        if (rest.length) {
+          gsap.fromTo(
+            rest,
+            { opacity: 0, y: 35 },
+            {
+              opacity: 1,
+              y: 0,
+              stagger: 0.12,
+              delay: 0.35,
+              duration: 0.7,
+              ease: "power3.out",
+              scrollTrigger: {
+                trigger: ambassadorTextRef.current,
+                start: "top 85%",
+                once: true,
+              },
+            }
+          );
+        }
+      }
+
+      if (ambassadorLeftImgRef.current) {
+        gsap.fromTo(
+          ambassadorLeftImgRef.current,
+          { opacity: 0, x: -60, rotate: -8 },
+          {
+            opacity: 1,
+            x: 0,
+            rotate: 0,
+            duration: 1,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: ambassadorLeftImgRef.current,
+              start: "top 88%",
+              once: true,
+            },
+          }
+        );
+      }
+      if (ambassadorRightImgRef.current) {
+        gsap.fromTo(
+          ambassadorRightImgRef.current,
+          { opacity: 0, x: 60, rotate: 8 },
+          {
+            opacity: 1,
+            x: 0,
+            rotate: 0,
+            duration: 1,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: ambassadorRightImgRef.current,
+              start: "top 88%",
+              once: true,
+            },
+          }
+        );
+      }
+
+      // ── 7. Benefits cards scale-up with spring
+      if (benefitsCardsRef.current) {
+        const bCards = benefitsCardsRef.current.querySelectorAll(":scope > div");
+        gsap.fromTo(
+          bCards,
+          { opacity: 0, scale: 0.8, y: 40 },
+          {
+            opacity: 1,
+            scale: 1,
+            y: 0,
+            stagger: 0.15,
+            duration: 0.75,
+            ease: "back.out(1.6)",
+            scrollTrigger: {
+              trigger: benefitsCardsRef.current,
+              start: "top 87%",
+              once: true,
+            },
+          }
+        );
+      }
+
+      // ── 8. FAQ items slide-in from left
+      if (faqListRef.current) {
+        const faqItems = faqListRef.current.querySelectorAll(":scope > div");
+        gsap.fromTo(
+          faqItems,
+          { opacity: 0, x: -50 },
+          {
+            opacity: 1,
+            x: 0,
+            stagger: 0.12,
+            duration: 0.65,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: faqListRef.current,
+              start: "top 88%",
+              once: true,
+            },
+          }
+        );
+      }
+
+      // ── 9. Form card reveal
+      if (formCardRef.current) {
+        gsap.fromTo(
+          formCardRef.current,
+          { opacity: 0, y: 70, scale: 0.95 },
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            duration: 0.9,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: formCardRef.current,
+              start: "top 88%",
+              once: true,
+            },
+          }
+        );
+      }
+
+      // ── 10. Footer fade-up
+      if (footerRef.current) {
+        gsap.fromTo(
+          footerRef.current,
+          { opacity: 0, y: 30 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: footerRef.current,
+              start: "top 95%",
+              once: true,
+            },
+          }
+        );
+      }
+    });
+
+    return () => ctx.revert();
+  }, []);
+
+  // ─── AnimeJS: Competition card hover micro-animation ───────────────────────
+  const handleCompCardEnter = (e: React.MouseEvent<HTMLDivElement>) => {
+    animeJs(e.currentTarget, {
+      translateY: -6,
+      duration: 320,
+      ease: "outCubic",
+    });
+  };
+
+  const handleCompCardLeave = (e: React.MouseEvent<HTMLDivElement>) => {
+    animeJs(e.currentTarget, {
+      translateY: 0,
+      duration: 280,
+      ease: "inCubic",
+    });
+  };
+
+  // ─── AnimeJS: Master plan card hover ──────────────────────────────────────
+  const handleStageCardEnter = (e: React.MouseEvent<HTMLDivElement>) => {
+    animeJs(e.currentTarget, {
+      translateY: -5,
+      scale: 1.02,
+      duration: 280,
+      ease: "outBack(1.7)",
+    });
+  };
+  const handleStageCardLeave = (e: React.MouseEvent<HTMLDivElement>) => {
+    animeJs(e.currentTarget, {
+      translateY: 0,
+      scale: 1,
+      duration: 250,
+      ease: "inCubic",
+    });
+  };
+
+  // ─── AnimeJS: Benefits card hover ─────────────────────────────────────────
+  const handleBenefitEnter = (e: React.MouseEvent<HTMLDivElement>) => {
+    animeJs(e.currentTarget, {
+      translateY: -8,
+      scale: 1.03,
+      duration: 300,
+      ease: "outBack(1.7)",
+    });
+    const icon = e.currentTarget.querySelector(".benefit-icon");
+    if (icon) {
+      animeJs(icon as HTMLElement, {
+        rotate: ["0deg", "12deg", "-8deg", "0deg"],
+        duration: 500,
+        ease: "outElastic(1, 0.5)",
+      });
+    }
+  };
+  const handleBenefitLeave = (e: React.MouseEvent<HTMLDivElement>) => {
+    animeJs(e.currentTarget, {
+      translateY: 0,
+      scale: 1,
+      duration: 260,
+      ease: "inCubic",
+    });
+  };
+
+  // ─── AnimeJS: FAQ toggle pulse ─────────────────────────────────────────────
+  const handleFaqToggle = (id: number, el: HTMLButtonElement) => {
+    toggleFaq(id);
+    animeJs(el, {
+      scale: [1, 0.97, 1],
+      duration: 250,
+      ease: "outQuad",
+    });
+  };
 
   const handleOpenRegister = (competitionName?: string) => {
     if (competitionName) {
@@ -259,9 +656,12 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
-      {/* Top Combined Area with CYE Background spanning from top of Navbar through Hero */}
-      <div className="relative w-full min-h-screen lg:h-screen flex flex-col justify-between overflow-hidden bg-slate-50">
-        {/* Background Graphic Image extending behind Navbar */}
+      {/* Header Bar - Static / Sticky at the top of the page so it remains visible when scrolling */}
+      <Header onOpenRegister={() => handleOpenRegister()} />
+
+      {/* Top Combined Area with CYE Background spanning through Hero */}
+      <div className="relative w-full min-h-[calc(100vh-5rem)] lg:h-[calc(100vh-5rem)] flex flex-col justify-between overflow-hidden bg-slate-50">
+        {/* Background Graphic Image extending behind Hero */}
         <div className="absolute inset-0 z-0 select-none">
           <Image
             src="/images/IMG BG.png"
@@ -275,9 +675,6 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/70 to-transparent md:w-3/4 pointer-events-none" />
         </div>
 
-        {/* Header Bar */}
-        <Header onOpenRegister={() => handleOpenRegister()} />
-
         {/* 1. Main Hero Section (Fills remaining height of screen) */}
         <HeroSection
           onExploreClick={scrollToExplore}
@@ -287,29 +684,46 @@ export default function Home() {
 
       <main className="flex-1">
 
-        {/* 2. Competitions Showcase Section */}
-        <section id="explore" className="py-20 bg-white border-b border-slate-200/80">
+        {/* ═══════════════════════════════════════════════════════════
+            2. Competitions Showcase Section
+        ═══════════════════════════════════════════════════════════ */}
+        <section
+          id="explore"
+          ref={competitionsSectionRef}
+          className="py-20 bg-white border-b border-slate-200/80"
+        >
           <div className="w-full px-4 sm:px-8 lg:px-12 xl:px-16">
-            <div className="text-center max-w-3xl mx-auto space-y-3 mb-14">
+            {/* Section heading — animated by GSAP stagger */}
+            <div
+              ref={competitionsHeadRef}
+              className="text-center max-w-3xl mx-auto space-y-3 mb-14"
+            >
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#003B96]/10 text-[#003B96] text-xs font-black uppercase tracking-widest">
                 <Trophy className="w-3.5 h-3.5 text-[#F26522]" />
                 <span>Competitive Tracks</span>
               </div>
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight">
-                Featured Competitions & Events
+                Featured Competitions &amp; Events
               </h2>
               <p className="text-slate-500 text-sm sm:text-base font-medium">
                 Choose your field of excellence, compete with the sharpest minds in Islamabad, and earn official accolades.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            {/* Cards — animated by GSAP stagger + AnimeJS mouse interaction */}
+            <div
+              ref={competitionsGridRef}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8"
+            >
               {COMPETITION_DETAILS.map((comp) => {
                 const IconComponent = comp.icon;
                 return (
                   <div
                     key={comp.title}
-                    className="group relative bg-slate-50/80 rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between"
+                    onMouseEnter={handleCompCardEnter}
+                    onMouseLeave={handleCompCardLeave}
+                    className="group relative bg-slate-50/80 rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-xs flex flex-col justify-between cursor-pointer"
+                    style={{ willChange: "transform, box-shadow" }}
                   >
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
@@ -365,44 +779,59 @@ export default function Home() {
                 href="/competitions"
                 className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full text-sm font-black text-white bg-gradient-to-r from-[#003B96] to-[#002257] hover:opacity-95 shadow-md transition-all"
               >
-                <span>View Complete Rules & All 9 Categories</span>
+                <span>View Complete Rules &amp; All 9 Categories</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
           </div>
         </section>
 
-        {/* 3. CONFERENCES & CAREER PRO TALKS HIGHLIGHT */}
-        <section id="conferences" className="py-20 bg-gradient-to-br from-slate-900 via-[#002257] to-slate-950 text-white relative overflow-hidden">
+        {/* ═══════════════════════════════════════════════════════════
+            3. CONFERENCES & CAREER PRO TALKS HIGHLIGHT
+        ═══════════════════════════════════════════════════════════ */}
+        <section
+          id="conferences"
+          ref={conferenceSectionRef}
+          className="py-20 bg-gradient-to-br from-slate-900 via-[#002257] to-slate-950 text-white relative overflow-hidden"
+        >
+          {/* Animated ambient orbs */}
+          <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-[#003B96]/30 blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-24 -right-24 w-96 h-96 rounded-full bg-[#167C38]/25 blur-3xl pointer-events-none" />
+
           <div className="w-full px-4 sm:px-8 lg:px-12 xl:px-16 relative z-10">
             <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-              <div className="lg:col-span-7 space-y-6">
+              {/* Left — slides from left */}
+              <div ref={conferenceLeftRef} className="lg:col-span-7 space-y-6">
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 text-emerald-400 text-xs font-black uppercase tracking-widest border border-white/15">
                   <Briefcase className="w-3.5 h-3.5 text-[#F26522]" />
-                  <span>CYE Nexus & Career Pro Talks</span>
+                  <span>CYE Nexus &amp; Career Pro Talks</span>
                 </div>
                 <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight">
-                  Connect with Industry Mentors & Visionaries
+                  Connect with Industry Mentors &amp; Visionaries
                 </h2>
                 <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
                   Running alongside the competitions, CYE Nexus and Career Pro Talks bring keynote addresses, panel discussions, and career coaching directly from Pakistan&apos;s leading tech entrepreneurs and industry luminaries.
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                  <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
+                  <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1 hover:bg-white/10 transition-colors">
                     <span className="text-xs font-bold text-[#F26522] uppercase tracking-wider block">Keynote Sessions</span>
-                    <h4 className="text-base font-extrabold text-white">AI & Future Tech Horizons</h4>
+                    <h4 className="text-base font-extrabold text-white">AI &amp; Future Tech Horizons</h4>
                     <p className="text-xs text-slate-400">Emerging opportunities and technical career roadmaps.</p>
                   </div>
-                  <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
+                  <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1 hover:bg-white/10 transition-colors">
                     <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider block">Career Coaching</span>
-                    <h4 className="text-base font-extrabold text-white">Startup & Leadership Labs</h4>
+                    <h4 className="text-base font-extrabold text-white">Startup &amp; Leadership Labs</h4>
                     <p className="text-xs text-slate-400">Networking and guidance for ambitious student founders.</p>
                   </div>
                 </div>
               </div>
 
-              <div className="lg:col-span-5 bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/15 space-y-6 text-center shadow-2xl">
+              {/* Right — slides from right */}
+              <div
+                ref={conferenceRightRef}
+                className="lg:col-span-5 bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/15 space-y-6 text-center shadow-2xl"
+              >
                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#F26522] to-[#EA580C] text-white flex items-center justify-center mx-auto shadow-lg">
                   <Sparkles className="w-8 h-8" />
                 </div>
@@ -425,7 +854,7 @@ export default function Home() {
                     href="/conferences"
                     className="w-full py-3.5 rounded-2xl text-xs font-bold text-white bg-white/10 hover:bg-white/20 border border-white/15 transition-all flex items-center justify-center gap-2"
                   >
-                    <span>View Full Speaker Lineup & Details</span>
+                    <span>View Full Speaker Lineup &amp; Details</span>
                     <ArrowRight className="w-3.5 h-3.5 text-[#F26522]" />
                   </Link>
                 </div>
@@ -437,10 +866,15 @@ export default function Home() {
         {/* 3.5 ON-SCROLL HIGHLIGHTED CATEGORIES SHOWCASE */}
         <CategoriesScrollSection />
 
-        {/* 4. MASTER PLAN 6-STAGE ROADMAP */}
+        {/* ═══════════════════════════════════════════════════════════
+            4. MASTER PLAN 6-STAGE ROADMAP
+        ═══════════════════════════════════════════════════════════ */}
         <section className="py-20 bg-slate-50 border-b border-slate-200/80">
           <div className="w-full px-4 sm:px-8 lg:px-12 xl:px-16">
-            <div className="text-center max-w-3xl mx-auto space-y-3 mb-14">
+            <div
+              ref={masterPlanHeadRef}
+              className="text-center max-w-3xl mx-auto space-y-3 mb-14"
+            >
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#167C38]/10 text-[#167C38] text-xs font-black uppercase tracking-widest">
                 <Compass className="w-3.5 h-3.5 text-[#167C38]" />
                 <span>Event Execution Strategy</span>
@@ -453,13 +887,23 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div
+              ref={masterPlanGridRef}
+              className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            >
               {MASTER_PLAN_STAGES.map((step, idx) => (
                 <div
                   key={step.stage}
-                  className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs hover:shadow-lg transition-all duration-300 space-y-3 relative group"
+                  onMouseEnter={handleStageCardEnter}
+                  onMouseLeave={handleStageCardLeave}
+                  className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-3 relative group cursor-pointer"
+                  style={{ willChange: "transform" }}
                 >
-                  <div className="flex items-center justify-between">
+                  {/* Step number watermark */}
+                  <span className="absolute top-4 right-5 text-7xl font-black text-slate-100 select-none pointer-events-none leading-none">
+                    {idx + 1}
+                  </span>
+                  <div className="flex items-center justify-between relative z-10">
                     <span className={`px-3 py-1 rounded-xl text-xs font-black uppercase ${step.color}`}>
                       {step.stage}
                     </span>
@@ -467,10 +911,10 @@ export default function Home() {
                       {step.tag}
                     </span>
                   </div>
-                  <h3 className="text-lg font-extrabold text-slate-900 leading-snug group-hover:text-[#003B96] transition-colors">
+                  <h3 className="text-lg font-extrabold text-slate-900 leading-snug group-hover:text-[#003B96] transition-colors relative z-10">
                     {step.title}
                   </h3>
-                  <p className="text-xs sm:text-sm text-slate-500 font-medium leading-relaxed">
+                  <p className="text-xs sm:text-sm text-slate-500 font-medium leading-relaxed relative z-10">
                     {step.desc}
                   </p>
                 </div>
@@ -479,12 +923,20 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 5. BECOME A CYE AMBASSADOR SECTION */}
-        <section className="py-20 bg-white">
+        {/* ═══════════════════════════════════════════════════════════
+            5. BECOME A CYE AMBASSADOR SECTION
+        ═══════════════════════════════════════════════════════════ */}
+        <section
+          ref={ambassadorSectionRef}
+          className="py-20 bg-white"
+        >
           <div className="w-full px-4 sm:px-8 lg:px-12 xl:px-16">
             <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center text-center">
               {/* Left Vector Art */}
-              <div className="hidden lg:flex lg:col-span-3 justify-center items-center">
+              <div
+                ref={ambassadorLeftImgRef}
+                className="hidden lg:flex lg:col-span-3 justify-center items-center"
+              >
                 <div className="relative w-48 h-48 xl:w-56 xl:h-56">
                   <Image
                     src="/images/ChatGPT Image Aug 18, 2026, 03_38_03 AM 1.png"
@@ -497,29 +949,29 @@ export default function Home() {
               </div>
 
               {/* Center Main Text */}
-              <div className="lg:col-span-6 space-y-4">
-                <span className="block text-xs font-black text-slate-800 tracking-[0.25em] uppercase">
+              <div ref={ambassadorTextRef} className="lg:col-span-6 space-y-4">
+                <span className="block text-xs font-black text-slate-800 tracking-[0.25em] uppercase amb-reveal">
                   LEAD YOUR CAMPUS
                 </span>
 
                 <div className="space-y-0">
                   <h2 className="text-6xl sm:text-7xl font-black tracking-tight leading-none">
-                    <span className="text-[#003B96]">C</span>
-                    <span className="text-[#167C38]">Y</span>
-                    <span className="text-[#F26522]">E</span>
+                    <span className="cye-letter text-[#003B96] inline-block">C</span>
+                    <span className="cye-letter text-[#167C38] inline-block">Y</span>
+                    <span className="cye-letter text-[#F26522] inline-block">E</span>
                   </h2>
-                  <h3 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight leading-tight uppercase">
+                  <h3 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight leading-tight uppercase amb-reveal">
                     AMBASSADOR PROGRAM
                   </h3>
                 </div>
 
-                <p className="text-xs sm:text-sm text-slate-600 max-w-lg mx-auto font-medium leading-relaxed">
+                <p className="text-xs sm:text-sm text-slate-600 max-w-lg mx-auto font-medium leading-relaxed amb-reveal">
                   Represent Capital Youth Expo Pre-Event at BUIC on{" "}
-                  <strong className="text-slate-900 font-bold">1st October 2026</strong>{" "}
+                  <strong className="text-slate-900 font-bold">10th November 2026</strong>{" "}
                   and lead the vanguard of youth change in your department.
                 </p>
 
-                <div className="flex items-center justify-center gap-4 pt-4">
+                <div className="flex items-center justify-center gap-4 pt-4 amb-reveal">
                   <a
                     href="#ambassador-form"
                     className="group inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full text-sm font-black text-white bg-gradient-to-r from-[#F97316] to-[#EA580C] hover:from-[#EA580C] hover:to-[#C2410C] cye-glow-orange transition-all duration-300 shadow-md cursor-pointer"
@@ -539,7 +991,10 @@ export default function Home() {
               </div>
 
               {/* Right Vector Art */}
-              <div className="hidden lg:flex lg:col-span-3 justify-center items-center">
+              <div
+                ref={ambassadorRightImgRef}
+                className="hidden lg:flex lg:col-span-3 justify-center items-center"
+              >
                 <div className="relative w-48 h-48 xl:w-56 xl:h-56">
                   <Image
                     src="/images/ChatGPT Image Aug 18, 2026, 03_38_03 AM 1.png"
@@ -554,49 +1009,76 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 6. BENEFITS & PERKS */}
-        <section id="ambassador-benefits" className="py-16 bg-slate-50">
+        {/* ═══════════════════════════════════════════════════════════
+            6. BENEFITS & PERKS
+        ═══════════════════════════════════════════════════════════ */}
+        <section
+          id="ambassador-benefits"
+          ref={benefitsSectionRef}
+          className="py-16 bg-slate-50"
+        >
           <div className="w-full px-4 sm:px-8 lg:px-12 xl:px-16">
             <div className="max-w-5xl mx-auto space-y-12">
               <div className="flex items-center justify-center gap-4 text-center">
                 <span className="w-12 sm:w-16 h-[2px] bg-[#F26522] rounded-full" />
                 <h2 className="text-xs sm:text-sm font-black text-slate-800 uppercase tracking-[0.2em]">
-                  AMBASSADOR PERKS & RECOGNITION
+                  AMBASSADOR PERKS &amp; RECOGNITION
                 </h2>
                 <span className="w-12 sm:w-16 h-[2px] bg-[#F26522] rounded-full" />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-                <div className="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-xs hover:shadow-xl transition-all duration-300 text-center space-y-4 flex flex-col items-center">
-                  <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-xs">
+              <div
+                ref={benefitsCardsRef}
+                className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8"
+              >
+                {/* Card 1 */}
+                <div
+                  onMouseEnter={handleBenefitEnter}
+                  onMouseLeave={handleBenefitLeave}
+                  className="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-xs text-center space-y-4 flex flex-col items-center cursor-pointer"
+                  style={{ willChange: "transform" }}
+                >
+                  <div className="benefit-icon w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-xs">
                     <Award className="w-8 h-8 stroke-[2]" />
                   </div>
                   <h3 className="text-base font-black text-[#167C38] tracking-wider uppercase">
                     OFFICIAL RECOGNITION
                   </h3>
                   <p className="text-xs sm:text-sm text-slate-500 font-medium leading-relaxed">
-                    Official leadership certificates awarded by BUIC administration & social media spotlights.
+                    Official leadership certificates awarded by BUIC administration &amp; social media spotlights.
                   </p>
                 </div>
 
-                <div className="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-xs hover:shadow-xl transition-all duration-300 text-center space-y-4 flex flex-col items-center">
-                  <div className="w-16 h-16 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center shadow-xs">
+                {/* Card 2 */}
+                <div
+                  onMouseEnter={handleBenefitEnter}
+                  onMouseLeave={handleBenefitLeave}
+                  className="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-xs text-center space-y-4 flex flex-col items-center cursor-pointer"
+                  style={{ willChange: "transform" }}
+                >
+                  <div className="benefit-icon w-16 h-16 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center shadow-xs">
                     <Trophy className="w-8 h-8 stroke-[2]" />
                   </div>
                   <h3 className="text-base font-black text-[#F26522] tracking-wider uppercase">
-                    PRIZES & SHIELDS
+                    PRIZES &amp; SHIELDS
                   </h3>
                   <p className="text-xs sm:text-sm text-slate-500 font-medium leading-relaxed">
                     Exclusive appreciation shields, official merchandise, and special performance awards.
                   </p>
                 </div>
 
-                <div className="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-xs hover:shadow-xl transition-all duration-300 text-center space-y-4 flex flex-col items-center">
-                  <div className="w-16 h-16 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shadow-xs">
+                {/* Card 3 */}
+                <div
+                  onMouseEnter={handleBenefitEnter}
+                  onMouseLeave={handleBenefitLeave}
+                  className="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-xs text-center space-y-4 flex flex-col items-center cursor-pointer"
+                  style={{ willChange: "transform" }}
+                >
+                  <div className="benefit-icon w-16 h-16 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shadow-xs">
                     <Users className="w-8 h-8 stroke-[2]" />
                   </div>
                   <h3 className="text-base font-black text-[#003B96] tracking-wider uppercase">
-                    NETWORKING & MENTORSHIP
+                    NETWORKING &amp; MENTORSHIP
                   </h3>
                   <p className="text-xs sm:text-sm text-slate-500 font-medium leading-relaxed">
                     VIP backstage access and direct engagement with keynote speakers, tech founders, and judges.
@@ -607,8 +1089,13 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 7. FREQUENTLY ASKED QUESTIONS */}
-        <section className="py-16 bg-white border-t border-slate-100">
+        {/* ═══════════════════════════════════════════════════════════
+            7. FREQUENTLY ASKED QUESTIONS
+        ═══════════════════════════════════════════════════════════ */}
+        <section
+          ref={faqSectionRef}
+          className="py-16 bg-white border-t border-slate-100"
+        >
           <div className="w-full px-4 sm:px-8 lg:px-12 xl:px-16">
             <div className="max-w-4xl mx-auto space-y-10">
               <div className="flex items-center justify-center gap-4 text-center">
@@ -619,7 +1106,10 @@ export default function Home() {
                 <span className="w-12 sm:w-16 h-[2px] bg-[#F26522] rounded-full" />
               </div>
 
-              <div className="bg-slate-50/80 rounded-3xl p-4 sm:p-6 md:p-8 border border-slate-200/80 space-y-3">
+              <div
+                ref={faqListRef}
+                className="bg-slate-50/80 rounded-3xl p-4 sm:p-6 md:p-8 border border-slate-200/80 space-y-3"
+              >
                 {FAQ_ITEMS.map((item) => {
                   const IconComp = item.icon;
                   const isOpen = activeFaq === item.id;
@@ -629,7 +1119,7 @@ export default function Home() {
                       className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden transition-all"
                     >
                       <button
-                        onClick={() => toggleFaq(item.id)}
+                        onClick={(e) => handleFaqToggle(item.id, e.currentTarget)}
                         className="w-full p-4 sm:p-5 flex items-center justify-between gap-4 text-left hover:bg-slate-50/50 transition-colors cursor-pointer"
                       >
                         <div className="flex items-center gap-3.5">
@@ -660,19 +1150,28 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 8. AMBASSADOR & VOLUNTEER APPLICATION FORM */}
-        <section id="ambassador-form" className="py-16 bg-slate-50 border-t border-slate-200/80">
+        {/* ═══════════════════════════════════════════════════════════
+            8. AMBASSADOR & VOLUNTEER APPLICATION FORM
+        ═══════════════════════════════════════════════════════════ */}
+        <section
+          id="ambassador-form"
+          ref={formSectionRef}
+          className="py-16 bg-slate-50 border-t border-slate-200/80"
+        >
           <div className="w-full px-4 sm:px-8 lg:px-12 xl:px-16">
             <div className="max-w-4xl mx-auto space-y-10">
               <div className="flex items-center justify-center gap-4 text-center">
                 <span className="w-12 sm:w-16 h-[2px] bg-[#F26522] rounded-full" />
                 <h2 className="text-xs sm:text-sm font-black text-slate-800 uppercase tracking-[0.2em]">
-                  AMBASSADOR & VOLUNTEER APPLICATION FORM
+                  AMBASSADOR &amp; VOLUNTEER APPLICATION FORM
                 </h2>
                 <span className="w-12 sm:w-16 h-[2px] bg-[#F26522] rounded-full" />
               </div>
 
-              <div className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200/80 shadow-md">
+              <div
+                ref={formCardRef}
+                className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200/80 shadow-md"
+              >
                 {errorMsg && (
                   <div className="mb-6 p-4 rounded-2xl bg-red-50 border border-red-200 flex items-start gap-3 text-red-700 text-xs sm:text-sm animate-in fade-in">
                     <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
@@ -809,7 +1308,9 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <Footer />
+      <footer ref={footerRef as React.RefObject<HTMLElement>}>
+        <Footer />
+      </footer>
 
       {/* Registration Modal */}
       <RegisterModal
@@ -820,4 +1321,3 @@ export default function Home() {
     </div>
   );
 }
-

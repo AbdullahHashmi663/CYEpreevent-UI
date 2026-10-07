@@ -182,7 +182,7 @@ export default function RegisterModal({
             Competition Registration
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 mt-1 font-medium">
-            Register your individual entry or team roster (up to 3 members) for Bahria University on 1st October 2026.
+            Register your individual entry or team roster (up to 3 members) for Bahria University on 10th November 2026.
           </p>
         </div>
 

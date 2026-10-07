@@ -74,7 +74,7 @@ export default function VenuePage() {
               Venue & Access Protocols
             </h1>
             <p className="text-slate-500 text-sm sm:text-base font-medium leading-relaxed">
-              Bahria University Islamabad Campus (BUIC), Shangrilla Road, Sector E-8, Islamabad. Join us on <strong className="text-slate-900">Thursday, 1st October 2026</strong> from <strong className="text-slate-900">09:00 AM to 05:00 PM PST</strong>.
+              Bahria University Islamabad Campus (BUIC), Shangrilla Road, Sector E-8, Islamabad. Join us on <strong className="text-slate-900">Tuesday, 10th November 2026</strong> from <strong className="text-slate-900">09:00 AM to 05:00 PM PST</strong>.
             </p>
           </div>
 
@@ -96,7 +96,7 @@ export default function VenuePage() {
               </div>
               <div>
                 <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider">Date</span>
-                <h4 className="text-sm font-black text-slate-900">1st October 2026</h4>
+                <h4 className="text-sm font-black text-slate-900">10th November 2026</h4>
               </div>
             </div>
 

@@ -4,7 +4,6 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import { Sparkles } from "lucide-react";
 
 interface CurtainColorTheme {
   name: string;
@@ -233,10 +232,10 @@ export default function BlindCurtainsTransition() {
           />
 
           {/* Logo / Emblem */}
-          <div className="relative flex items-center gap-3 mb-2">
+          <div className="relative flex items-center gap-3">
             <div className="relative w-10 h-10 flex-shrink-0 drop-shadow-md">
               <Image
-                src="/images/logo-removebg-preview 8.png"
+                src="/cye-logo.png"
                 alt="CYE Logo"
                 fill
                 className="object-contain"
@@ -250,18 +249,6 @@ export default function BlindCurtainsTransition() {
                 BUIC PRE-EVENT 2026
               </span>
             </div>
-          </div>
-
-          {/* Dynamic Theme Glow Bar & Animated Status */}
-          <div className="flex items-center gap-2 mt-1">
-            <Sparkles className="w-3.5 h-3.5" style={{ color: theme.accent }} />
-            <span
-              className="text-[11px] font-extrabold tracking-widest uppercase font-mono"
-              style={{ color: theme.accent }}
-            >
-              Loading Page • {theme.name} Edition
-            </span>
-            <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
           </div>
         </div>
       </motion.div>

@@ -105,3 +105,59 @@
 .bg-cye-liquid {
   background: conic-gradient(from 0deg, #F26522, #003B96, #167C38, #F97316, #003B96, #F26522);
 }
+
+/* ── GSAP Scroll Animation base states ──────────────────────────────────── */
+/* Elements start invisible; GSAP will handle entrance */
+.gsap-init-hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* 3D perspective wrapper for flipX animations */
+.perspective-container {
+  perspective: 1200px;
+}
+
+/* Will-change hint for GPU-composited animations */
+.gpu-layer {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
+/* Smooth counter number transition */
+@keyframes count-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-count-up {
+  animation: count-up 0.4s ease-out forwards;
+}
+
+/* Section reveal clip animation (used by GSAP slideReveal) */
+.clip-reveal {
+  clip-path: inset(0 100% 0 0);
+}
+.clip-revealed {
+  clip-path: inset(0 0% 0 0);
+  transition: clip-path 0.85s cubic-bezier(0.77,0,0.18,1);
+}
+
+/* Floating shimmer badge */
+@keyframes badge-shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+.badge-shimmer {
+  background: linear-gradient(90deg, #003B96 25%, #2563EB 50%, #003B96 75%);
+  background-size: 200% auto;
+  animation: badge-shimmer 3s linear infinite;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Parallax section backgrounds */
+.parallax-bg {
+  will-change: transform;
+  transform: translateZ(0);
+}
